@@ -10,7 +10,10 @@ ADMINS = (
 MANAGERS = ADMINS
 
 #Eudis
-BASE = '/home/prototype/repos/git/img-search/projects'
+#BASE = '/home/prototype/repos/git/img-search/projects'
+
+#Carl
+BASE = '/home/carl/protected/git/img-search/projects'
 
 DATABASES = {
     'default': {
