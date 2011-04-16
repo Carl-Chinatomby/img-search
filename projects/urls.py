@@ -8,7 +8,8 @@ from django.conf.urls.defaults import patterns, include, url
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'imgsearch.views.main', name='main'),
-    url(r'^upload/', 'imgsearch.views.upload', name='upload')
+    url(r'^upload/', 'imgsearch.views.upload', name='upload'),
+    url(r'^results/', 'imgsearch.views.results', name='results')
     # url(r'^projects/', include('projects.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

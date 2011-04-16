@@ -1,0 +1,29 @@
+#results {
+    width: 70%;
+    margin: auto;
+    text-align: center;
+    padding: 2% 2% 3% 2%;
+    border: 1px solid gray;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radisu: 5px;
+}
+
+
+#orig {
+    width: 70%;
+    margin: auto;
+    text-align: left;
+    padding: 2% 2% 3% 2%;
+}
+
+#stat {
+    width: 158px;
+    height: 148px;
+    border: 1px solid gray;
+    padding: 1% 1% 1% 1%;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radisu: 5px;
+    
+}

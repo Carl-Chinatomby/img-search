@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    <link rel='stylesheet' href="{{ STATIC_PREFIX }}css/results.css" type='text/css' />
+{% endblock %}
+
+{% block js %}
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/results.js"></script>
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/raphael-min.js"></script>
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/g.raphael-min.js"></script>
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/g.bar-min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+ <div style='float: left; width: 100%; text-align: center;'>
+    <a style='font-size: 18px;' href="/">Back To Search</a><br /> <br /> <br />
+ </div>
+
+ <div style='float: left; width: 100%;'> 
+    
+    <div id="orig">
+        
+        <div style='width:20%; float: left;'>
+            <img src='' width="128px" height="128px" alt="Original Pic" />
+        </div>
+        <div style='width:78%; float: right;'>
+           <div style='width: 39%; float: left;'>
+            <div id='stat'>
+
+            </div> 
+           </div>
+           <div style='width: 59%; float: left'>
+            <span style='color: rgb(100,100,180); font-size: 18px;'>Query:</span> "Cool Games" <br /><br />
+            Threshold: <input id='thresh' type='text' />
+           </div>
+           
+        </div>
+    </div>
+ </div>
+ <div style='float: left; width: 100%;'>
+    <br />
+ </div>
+ <div style='float: left; width: 100%;'>
+    <div id='results'>
+    
+    </div>
+ </div>
+
+{% endblock %}

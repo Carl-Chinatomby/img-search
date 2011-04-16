@@ -15,3 +15,10 @@ def upload(request):
     c = Context({})
     t = loader.get_template('upload/index.html')
     return HttpResponse(t.render(c))
+
+
+def results(request):
+
+    c = Context({})
+    t = loader.get_template('results/index.html')
+    return HttpResponse(t.render(c))
