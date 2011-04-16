@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    <link rel='stylesheet' href="{{ STATIC_PREFIX }}css/upload.css" type='text/css' />
+{% endblock %}
+
+{% block js %}
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/upload.js"></script>
+{% endblock %}
+
+{% block content %}
+ <div id='upload'>
+
+
+ </div>
+
+{% endblock %}
