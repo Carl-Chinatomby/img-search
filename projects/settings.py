@@ -11,6 +11,10 @@ MANAGERS = ADMINS
 
 #Eudis
 BASE = '/home/prototype/repos/git/img-search/projects'
+TEMPLATE_BASE = BASE + "/imgsearch/templates"
+
+#Carl
+#...
 
 DATABASES = {
     'default': {
@@ -109,6 +113,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    TEMPLATE_BASE
 )
 
 INSTALLED_APPS = (

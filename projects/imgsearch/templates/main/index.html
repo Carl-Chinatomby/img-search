@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    <link rel='stylesheet' href="{{ STATIC_PREFIX }}css/main.css" type='text/css' />
+{% endblock %}
+
+{% block js %}
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/main.js"></script>
+{% endblock %}
+
+{% block content %}
+ <div id='upload'>
+    <a href="#">Upload File</a>
+    <br />
+    <br />
+    <br />
+ </div>
+ <div id='search'>
+
+    <div id='text'>
+        <input id='search_box' type='text' size='30' />
+        <input type="Submit" />
+    </div> 
+
+    <div id='image'>
+        <br />
+        <br />
+        <input type='file' />
+        <br />
+    </div>
+    <div style='width: 100%; float: left; text-align: center;'>
+        <div style='width: 50%; margin: auto;'>
+        <br />
+        <hr />
+        </div>
+    </div>
+    <div style='width: 100%; float: left; text-align: center;'>
+        <br />
+        
+        Include Image Search? <br /> <input id='left' type='radio' name='group' value="Yes" /> Yes  &nbsp; &#149; &nbsp; <input id='right' type='radio' name='group' value='No'/> No
+        <br />
+    </div>
+    
+
+ </div>
+
+{% endblock %}
