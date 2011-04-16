@@ -24,24 +24,33 @@
     <div id="orig">
         
         <div style='width:20%; float: left;'>
-            <img src='' width="128px" height="128px" alt="Original Pic" />
+            <div> Original Image </div>
+            <br />
+            <img src='{{ STATIC_PREFIX }}images/wolf.jpg' width="128px" height="128px" alt="Original Pic" />
+            
         </div>
         <div style='width:78%; float: right;'>
            <div style='width: 39%; float: left;'>
+            <div> Original Image Histogram </div>
+            <br />
             <div id='stat'>
 
             </div> 
+            
            </div>
            <div style='width: 59%; float: left'>
             <span style='color: rgb(100,100,180); font-size: 18px;'>Query:</span> "Cool Games" <br /><br />
-            Threshold: <input id='thresh' type='text' />
+            Threshold: <input id='thresh' size='10' type='text' />
            </div>
            
         </div>
     </div>
+    
  </div>
- <div style='float: left; width: 100%;'>
+ <div style='float: left; width: 100%; text-align: center; font-size: 18px;'>
+    <hr />
     <br />
+    Results
  </div>
  <div style='float: left; width: 100%;'>
     <div id='results'>

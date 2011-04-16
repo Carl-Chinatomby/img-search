@@ -45,8 +45,9 @@ html, body {
 }
 
 #footer {
+    /*
     bottom: 0;
-    position: absolute;
+    position: absolute;*/
     text-align: center;
     clear: both;
     margin: auto;
