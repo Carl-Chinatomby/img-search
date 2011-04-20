@@ -79,7 +79,7 @@ def upload(request):
 
 def results(request):
 
-    print  " img: ", request.FILES
+    
     if request.method == "POST":
         # First determine whats being included in the search
         try: 
@@ -89,9 +89,12 @@ def results(request):
 
         try:
             text = request.POST['search_box']
+            if text == '':
+                text = None
         except: 
             text = None
 
+        print "text ", text, " img: ", img
         
         if img == None and text != None:
             # text only search
@@ -99,13 +102,17 @@ def results(request):
 
         elif img != None and text == None:
             # img only search
-            
-            if request.FILES['img_file'].content_type != "image/jpg":
+            print  " img: ", request.FILES['img_file'].content_type
+
+            if request.FILES['img_file'].content_type != "image/jpeg":
                 return HttpResponse("Must be JPEG!")
 
             form = UploadFile(request.POST, request.FILES['img_file'])
 
-            img_only_search(method.FILES['img_file'])
+            img_only_search(request.FILES['img_file'])
+
+
+
             pass
 
         elif img != None and text != None:
