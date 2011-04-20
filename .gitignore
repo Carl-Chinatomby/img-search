@@ -1,7 +1,7 @@
 *.pyc
 ~
 *.png
-*.jpg
+#*.jpg
 *.gif
 *.bmp
 *.dat
