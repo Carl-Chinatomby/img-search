@@ -41,8 +41,9 @@ def handle_img_upload(f):
 
     return
 
-def handle_img_search(f):
+def img_only_search(f):
    
+    print "Filename ", f.name
     """
     print IMAGE_DIR + '/' + f.name
     try:    
@@ -78,8 +79,43 @@ def upload(request):
 
 def results(request):
 
+    print  " img: ", request.FILES
     if request.method == "POST":
+        # First determine whats being included in the search
+        try: 
+            img = request.FILES['img_file']
+        except:
+            img = None
+
+        try:
+            text = request.POST['search_box']
+        except: 
+            text = None
+
         
+        if img == None and text != None:
+            # text only search
+            pass
+
+        elif img != None and text == None:
+            # img only search
+            
+            if request.FILES['img_file'].content_type != "image/jpg":
+                return HttpResponse("Must be JPEG!")
+
+            form = UploadFile(request.POST, request.FILES['img_file'])
+
+            img_only_search(method.FILES['img_file'])
+            pass
+
+        elif img != None and text != None:
+            # text AND img search        
+            pass
+
+
+            
+
+        """
         try:
             form = UploadFile(request.POST, request.FILES['img_file'])
             if form.is_valid():
@@ -90,12 +126,11 @@ def results(request):
                 return HttpResponse("Invalid form input...")
         except:
             return HttpResponse("Error using image in search...")
-
-    else:
-        form = UploadFile()
+        """
+    
                     
 
-    return render_to_response("main/index.html", {'form':form})
+    return HttpResponseRedirect("/")
 
 
 

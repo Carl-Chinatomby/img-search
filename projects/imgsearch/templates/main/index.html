@@ -19,7 +19,7 @@
  </div>
 
  <div id='search'>
-    <form id='txt' action='/results/' enc='multipart/form-data' method="POST">
+    <form id='txt' action='/results/' enctype='multipart/form-data' method="POST">
         {% csrf_token %}
         <div id='text'>
             <input id='search_box' name='search_box' type='text' size='30' />
