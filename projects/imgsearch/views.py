@@ -16,9 +16,9 @@ def handle_file_upload(f):
     return
 
 def main(request):
-    c = Context({})
+    
     t = loader.get_template("main/index.html")
-    return HttpResponse(t.render(c))
+    return render_to_response('main/index.html', context_instance=RequestContext(request))
 
 
 
