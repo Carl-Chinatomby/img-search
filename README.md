@@ -2,7 +2,7 @@ Project Specification
 =====================
 
 ### Note: 
-      This is meant to be a group work. Each group may have up to three members.
+This is meant to be a group work. Each group may have up to three members.
 
 # Deadline: the last lecture is the demo session for each group
  
@@ -18,7 +18,7 @@ allocated to this project.
  
   
 # indexing phase: 
->        three types of data need to be handled (only gray scale
+> three types of data need to be handled (only gray scale
 > images/videos are considered):
 > 1.text: words present in titles and descriptions for each image/video
 > should be indexed by their frequencies.
@@ -33,9 +33,9 @@ allocated to this project.
 > edge map of each image as the index for each representative frame.
 
 # query phase:
->      Find top matching images/videos for an image posed by users
+> Find top matching images/videos for an image posed by users
 > based on the similarities of the  
->      given query image I and/or keyword(s). The distance is
+> given query image I and/or keyword(s). The distance is
 > determined by the corresponding 
 > 1.two 16-bin histograms: intensity and edge; and/or 
 > 2.matching keywords based on edit distance and saved frequencies.
