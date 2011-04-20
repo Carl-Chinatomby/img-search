@@ -8,9 +8,10 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'imgsearch.views.main', name='main'),
-    url(r'^upload/', 'imgsearch.views.upload', name='upload'),
+    url(r'^upload/$', 'imgsearch.views.upload', name='upload'),
     url(r'^results/', 'imgsearch.views.results', name='results'),
-    url(r'^upload_file/', 'imgsearch.views.upload_file', name='upload_file'),
+    url(r'^upload_file/$', 'imgsearch.views.upload_file', name='upload_file'),
+    url(r'^upload/complete/$', 'imgsearch.views.complete', name='complete'),
     # url(r'^projects/', include('projects.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

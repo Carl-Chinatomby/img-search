@@ -20,9 +20,11 @@
     <span style='font-size: 16px;'>Upload <span style='color: rgb(80,80,255);'>Grayscale Image (Jpeg Only)</span> </span>  <br /><br /> 
 
     <form id='i' action='/upload_file/' method='post' enctype='multipart/form-data'>
-    {% csrf_token %}
-     <input id='img' name='img' type='file' />
-    </form><br />
+    	{% csrf_token %}
+    	 <input id='img' name='img' type='file' />
+    </form>
+
+	<br />
     <br /><br />
     <u>or</u>
     <br /><br /><br />
