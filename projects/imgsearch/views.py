@@ -41,6 +41,28 @@ def handle_img_upload(f):
 
     return
 
+def handle_img_search(f):
+   
+    """
+    print IMAGE_DIR + '/' + f.name
+    try:    
+        o = open(IMAGE_DIR + '/' + f.name, "wb")
+        
+        
+    except IOError:
+        print "Error opening file for writing!"
+        exit(-1)
+
+    f.open()
+    for chunk in f.chunks():
+        o.write(chunk)
+    
+    f.close()
+    o.close()
+    """
+
+    return
+
 def main(request):
     
     t = loader.get_template("main/index.html")
@@ -56,9 +78,27 @@ def upload(request):
 
 def results(request):
 
-    c = Context({})
-    t = loader.get_template('results/index.html')
-    return HttpResponse(t.render(c))
+    if request.method == "POST":
+        
+        try:
+            form = UploadFile(request.POST, request.FILES['img_file'])
+            if form.is_valid():
+                print "FUCK YEAH"
+                #handle_img_search(request.FILES['img_file'])
+                return render_to_response("results/index.html", context_instance=RequestContext(request))
+            else:
+                return HttpResponse("Invalid form input...")
+        except:
+            return HttpResponse("Error using image in search...")
+
+    else:
+        form = UploadFile()
+                    
+
+    return render_to_response("main/index.html", {'form':form})
+
+
+
 
 
 def complete(request):
@@ -78,12 +118,12 @@ def upload_file(request):
               
                 return HttpResponseRedirect('/upload/complete')
             else:
-                return 
+                return HttpResponse("Invalid form input...")
         else:
             
             form = UploadFile()
     except:
         return HttpResponse("Error During Upload")
         
-    return render_to_response("upload/index.html", { 'form':form})
+    return render_to_response("upload/index.html", { 'form':form} )
     

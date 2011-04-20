@@ -19,18 +19,21 @@
  </div>
 
  <div id='search'>
+    <form id='txt' action='/results/' enc='multipart/form-data' method="POST">
+        {% csrf_token %}
+        <div id='text'>
+            <input id='search_box' name='search_box' type='text' size='30' />
+            <input id='sub' type="button" value="Submit" />
+        </div> 
 
-    <div id='text'>
-        <input id='search_box' type='text' size='30' />
-        <input id='sub' type="Submit" />
-    </div> 
+        <div id='image'>
+            <br />
+            <br />
+            <input id="img_file" name='img_file' type='file' />
+            <br />
+        </div>
+    </form>
 
-    <div id='image'>
-        <br />
-        <br />
-        <input id="img_file" type='file' />
-        <br />
-    </div>
     <div style='width: 100%; float: left; text-align: center;'>
         <div style='width: 50%; margin: auto;'>
         <br />
@@ -40,9 +43,13 @@
     <div style='width: 100%; float: left; text-align: center;'>
         <br />
         
-        Include Image Search? <br /> <input id='left' type='radio' name='group' value="Yes" /> Yes  &nbsp; &#149; &nbsp; <input id='right' type='radio' name='group' value='No'/> No
+        Include Image Search? <br /> 
+        
+        <input id='left' type='radio' name='group' value="Yes" /> Yes  &nbsp; &#149; &nbsp; <input id='right' type='radio' name='group' value='No'/> No
+       
         <br />
     </div>
+    
     
 
  </div>
