@@ -23,6 +23,140 @@ IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/imag
 VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
 
 
+
+
+#class to hold the result to display
+
+class QueryResult:
+    def __init__(self):
+        self.filename = ''
+        self.percent = 0
+        self.rank = 0
+
+
+def img_rank(histograms):
+    
+    result = []
+
+    norm_diff = [0 for i in range(16)]
+    edge_diff = [0 for i in range(16)]
+
+    cur_norm = histograms[0]
+    cur_edge = histograms[1]
+
+    all_norms = Histograms.objects.filter(hist_type='n').all()
+    all_edge  = Histograms.objects.filter(hist_type='e').all()
+
+    for bin in all_norms:
+        res = QueryResult()
+        
+        norm_diff[0] = bin.bin0 - cur_norm[0]
+        m = max((bin.bin0, cur_norm[0]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[0]/m )
+        
+        norm_diff[1] = abs(bin.bin1 - cur_norm[1]) 
+        m = max((bin.bin1, cur_norm[1]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[1]/m )
+         
+        norm_diff[2] = abs(bin.bin2 - cur_norm[2])
+
+        m = max((bin.bin2, cur_norm[2]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[2]/m )
+    
+        norm_diff[3] = abs(bin.bin3 - cur_norm[3])
+
+        m = max((bin.bin3, cur_norm[3]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[3]/m )
+
+        norm_diff[4] = abs(bin.bin4 - cur_norm[4])
+        m = max((bin.bin4, cur_norm[4]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[4]/m )
+
+        norm_diff[5] = abs(bin.bin5 - cur_norm[5])
+
+        m = max((bin.bin5, cur_norm[5]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[5]/m )
+        norm_diff[6] = abs(bin.bin6 - cur_norm[6])
+
+        m = max((bin.bin6, cur_norm[6]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[6]/m )
+
+        norm_diff[7] = abs(bin.bin7 - cur_norm[7])
+        
+        m = max((bin.bin7, cur_norm[7]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[7]/m )
+
+        norm_diff[8] = abs(bin.bin8 - cur_norm[8])
+        m = max((bin.bin8, cur_norm[8]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[8]/m )
+        norm_diff[9] = abs(bin.bin9 - cur_norm[9])
+        m = max((bin.bin9, cur_norm[9]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[9]/m )
+
+        norm_diff[10] = abs(bin.bin10 - cur_norm[10])
+        m = max((bin.bin10, cur_norm[10]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[10]/m )
+        norm_diff[11] = abs(bin.bin11 - cur_norm[11])
+        m = max((bin.bin11, cur_norm[11]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[11]/m )
+        norm_diff[12] = abs(bin.bin12 - cur_norm[12])
+
+        m = max((bin.bin12, cur_norm[12]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[12]/m )
+
+        norm_diff[13] = abs(bin.bin13 - cur_norm[13])
+
+        m = max((bin.bin13, cur_norm[13]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[13]/m )
+
+        norm_diff[14] = abs(bin.bin14 - cur_norm[14])
+
+        m = max((bin.bin14, cur_norm[14]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[14]/m )
+        norm_diff[15] = abs(bin.bin15 - cur_norm[15])
+        m = max((bin.bin15, cur_norm[15]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[15]/m )
+        
+            
+        print "Total Percent Difference: ", res.percent,"%"
+
+
+    #for a_hist in all_edge:
+    return 
+
+
 class UploadFile(forms.Form):
     name = models.ImageField()
     
@@ -288,9 +422,10 @@ def results(request):
 
             histograms = img_only_search(request.FILES['img_file'])
 
+            results = img_rank(histograms)
             
 
-            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': ''})
+            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':results})
             
             #return render_to_response("results/index.html", context_instance=RequestContext(request))
             pass
@@ -352,7 +487,7 @@ def upload_file(request):
                 # Here, we insert the Images information, now that we have the two IDs above.
 
                 img = Images()
-                """
+               
                 print str(request.FILES['img'].name)
                 print int(norm_id)
                 print int(edge_id)
@@ -366,7 +501,7 @@ def upload_file(request):
                 img.description = str(request.POST['textarea'])
 
                 img.save()
-                """
+                
 
                 return HttpResponseRedirect('/upload/complete')
             else:
