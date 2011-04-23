@@ -476,6 +476,11 @@ def upload_file(request):
             
             if form.is_valid():
                 
+                #We test to see if the given image is of L band (true Grayscale)
+                test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
+                if test_grayscale.mode != 'L':
+                    return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
+                
                 handle_img_upload(request.FILES['img'])
 
 
