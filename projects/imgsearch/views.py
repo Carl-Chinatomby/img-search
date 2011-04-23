@@ -133,7 +133,7 @@ def calculate_hist(path):
     normal.bin13 = hist16bin[13]
     normal.bin14 = hist16bin[14]
     normal.bin15 = hist16bin[15]
-
+    
     normal.save()
 
     return hist16bin
