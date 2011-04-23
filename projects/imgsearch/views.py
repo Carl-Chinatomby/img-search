@@ -55,7 +55,7 @@ def handle_img_upload(f):
     # At this point, the file is in the images folder, and we can
     # do processing on it.
 
-    calculate_hist(path)
+    calculate_hist(path, 'n')
         
 
     # Next, we generate a edge map.  We can use various 
@@ -65,12 +65,12 @@ def handle_img_upload(f):
 
     
     #Finally, we calculate the edge map histogram
-    calculate_hist(tmp_file)
+    calculate_hist(tmp_file, 'e')
     
 
     return
 
-def calculate_hist(path):
+def calculate_hist(path, t):
     """ Returns a length 16 list """
     try:
         image = Image.open(path)
@@ -133,7 +133,7 @@ def calculate_hist(path):
     normal.bin13 = hist16bin[13]
     normal.bin14 = hist16bin[14]
     normal.bin15 = hist16bin[15]
-    
+    normal.hist_type = t
     normal.save()
 
     return hist16bin
@@ -229,9 +229,9 @@ def img_only_search(f):
 
     ## Now, we calculate the edge and intensity histograms of this image...
 
-    norm_hist = calculate_hist(tmp_img)
+    norm_hist = calculate_hist(tmp_img, 'n')
     gradient(tmp_img, tmp_img_edge)
-    edge_hist = calculate_hist(tmp_img_edge)
+    edge_hist = calculate_hist(tmp_img_edge, 'e')
 
     #Now, we pass the information to the calling method so we can pass it 
     #to the template for display
