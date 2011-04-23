@@ -7,7 +7,7 @@ from django.shortcuts import render_to_response
 from django import forms
 from django.db import models
 
-from imgsearch.models import Histograms
+from imgsearch.models import Histograms, Images
 
 import StringIO
 from PIL import Image, ImageDraw
@@ -77,11 +77,11 @@ def calculate_hist(path):
     except IOError:
         print "Error Opening Image file (PIL)"
 
-    print "Format: ", image.format, " Size: ", image.size, " Mode: ", image.mode
+    #print "Format: ", image.format, " Size: ", image.size, " Mode: ", image.mode
 
     # This is so neat!  A histogram method!  Hopefully the professor doesn't disapprove.
     
-    print "Histogram: ", image.histogram()
+    #print "Histogram: ", image.histogram()
 
     # However, we must make it a 16 bin historgram.
 
@@ -107,13 +107,13 @@ def calculate_hist(path):
             
         else:
             hist16bin[bin_count] += hist[i]
-            
+    """        
     print "\n\n"
     print "16 Bin histogram: ", hist16bin
     print 
     print "Size: ", len(hist16bin)
     print "Original Size: ", len(hist)
-
+    """
     # Now we put the normal histogram in the database
 
     normal = Histograms()
@@ -330,6 +330,10 @@ def complete(request):
 
 
 def upload_file(request):
+    print request.POST['textarea']
+    print 
+    print request.POST['title']
+
     try:
     	if request.method == 'POST':
             
@@ -338,7 +342,32 @@ def upload_file(request):
             if form.is_valid():
                 
                 handle_img_upload(request.FILES['img'])
-              
+
+
+                # We know that the normal histogram is inserted into the database
+                # first, and the edge second, so we can do this hack:
+                edge_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 1]['id']
+                norm_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 2:len(Histograms.objects.all()) - 1].get()['id']
+                
+                # Here, we insert the Images information, now that we have the two IDs above.
+
+                img = Images()
+                """
+                print str(request.FILES['img'].name)
+                print int(norm_id)
+                print int(edge_id)
+                print str(request.POST['title'])
+                print str(request.POST['textarea'])
+
+                img.filename = str(request.FILES['img'].name)
+                img.orig_hist = int(norm_id)
+                img.edge_hist = int(edge_id)
+                img.title = str(request.POST['title'])
+                img.description = str(request.POST['textarea'])
+
+                img.save()
+                """
+
                 return HttpResponseRedirect('/upload/complete')
             else:
                 return HttpResponse("Invalid form input...")

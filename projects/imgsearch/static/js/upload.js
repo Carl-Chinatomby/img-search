@@ -3,7 +3,7 @@ $(document).ready(function(){
     $("#sub").click(function(){
         $("#spinner").show();
         
-        $("#upload").css("z-index", "1");
+        
         $("#i").submit();
     });
 });
