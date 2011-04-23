@@ -30,8 +30,8 @@ VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/vide
 class QueryResult:
     def __init__(self):
         self.filename = ''
-        self.percent = 0
-        self.rank = 0
+        self.percent = 0.0
+        self.rank = 0.0
 
 
 def img_rank(histograms):
@@ -51,109 +51,213 @@ def img_rank(histograms):
         res = QueryResult()
         
         norm_diff[0] = bin.bin0 - cur_norm[0]
+        print "Bin.bin3: ", bin.bin3
+        print "Cur_Norm3: ", cur_norm[3]
         m = max((bin.bin0, cur_norm[0]))
          
         if m != 0:
-            res.percent += abs( norm_diff[0]/m )
+            res.percent += abs( norm_diff[0]/ float(m) )
         
         norm_diff[1] = abs(bin.bin1 - cur_norm[1]) 
         m = max((bin.bin1, cur_norm[1]))
          
         if m != 0:
-            res.percent += abs( norm_diff[1]/m )
+            res.percent += abs( norm_diff[1]/float(m) )
          
         norm_diff[2] = abs(bin.bin2 - cur_norm[2])
 
         m = max((bin.bin2, cur_norm[2]))
          
         if m != 0:
-            res.percent += abs( norm_diff[2]/m )
+            res.percent += abs( norm_diff[2]/float(m) )
     
         norm_diff[3] = abs(bin.bin3 - cur_norm[3])
 
         m = max((bin.bin3, cur_norm[3]))
          
         if m != 0:
-            res.percent += abs( norm_diff[3]/m )
+            res.percent += abs( norm_diff[3]/float(m) )
 
         norm_diff[4] = abs(bin.bin4 - cur_norm[4])
         m = max((bin.bin4, cur_norm[4]))
          
         if m != 0:
-            res.percent += abs( norm_diff[4]/m )
+            res.percent += abs( norm_diff[4]/float(m) )
 
         norm_diff[5] = abs(bin.bin5 - cur_norm[5])
 
         m = max((bin.bin5, cur_norm[5]))
          
         if m != 0:
-            res.percent += abs( norm_diff[5]/m )
+            res.percent += abs( norm_diff[5]/float(m) )
         norm_diff[6] = abs(bin.bin6 - cur_norm[6])
 
         m = max((bin.bin6, cur_norm[6]))
          
         if m != 0:
-            res.percent += abs( norm_diff[6]/m )
+            res.percent += abs( norm_diff[6]/float(m) )
 
         norm_diff[7] = abs(bin.bin7 - cur_norm[7])
         
         m = max((bin.bin7, cur_norm[7]))
          
         if m != 0:
-            res.percent += abs( norm_diff[7]/m )
+            res.percent += abs( norm_diff[7]/float(m) )
 
         norm_diff[8] = abs(bin.bin8 - cur_norm[8])
         m = max((bin.bin8, cur_norm[8]))
          
         if m != 0:
-            res.percent += abs( norm_diff[8]/m )
+            res.percent += abs( norm_diff[8]/float(m) )
         norm_diff[9] = abs(bin.bin9 - cur_norm[9])
         m = max((bin.bin9, cur_norm[9]))
          
         if m != 0:
-            res.percent += abs( norm_diff[9]/m )
+            res.percent += abs( norm_diff[9]/float(m) )
 
         norm_diff[10] = abs(bin.bin10 - cur_norm[10])
         m = max((bin.bin10, cur_norm[10]))
          
         if m != 0:
-            res.percent += abs( norm_diff[10]/m )
+            res.percent += abs( norm_diff[10]/float(m) )
         norm_diff[11] = abs(bin.bin11 - cur_norm[11])
         m = max((bin.bin11, cur_norm[11]))
          
         if m != 0:
-            res.percent += abs( norm_diff[11]/m )
+            res.percent += abs( norm_diff[11]/float(m) )
         norm_diff[12] = abs(bin.bin12 - cur_norm[12])
 
         m = max((bin.bin12, cur_norm[12]))
          
         if m != 0:
-            res.percent += abs( norm_diff[12]/m )
+            res.percent += abs( norm_diff[12]/float(m) )
 
         norm_diff[13] = abs(bin.bin13 - cur_norm[13])
 
         m = max((bin.bin13, cur_norm[13]))
          
         if m != 0:
-            res.percent += abs( norm_diff[13]/m )
+            res.percent += abs( norm_diff[13]/float(m) )
 
         norm_diff[14] = abs(bin.bin14 - cur_norm[14])
 
         m = max((bin.bin14, cur_norm[14]))
          
         if m != 0:
-            res.percent += abs( norm_diff[14]/m )
+            res.percent += abs( norm_diff[14]/float(m) )
         norm_diff[15] = abs(bin.bin15 - cur_norm[15])
         m = max((bin.bin15, cur_norm[15]))
          
         if m != 0:
-            res.percent += abs( norm_diff[15]/m )
+            res.percent += abs( norm_diff[15]/float(m) )
+        
         
             
         print "Total Percent Difference: ", res.percent,"%"
 
 
-    #for a_hist in all_edge:
+    # Now edge map case
+    for bin in all_edge:
+        eres = QueryResult()
+        
+        norm_diff[0] = bin.bin0 - cur_norm[0]
+        m = max((bin.bin0, cur_norm[0]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[0]/ float(m) )
+        
+        norm_diff[1] = abs(bin.bin1 - cur_norm[1]) 
+        m = max((bin.bin1, cur_norm[1]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[1]/float(m) )
+         
+        norm_diff[2] = abs(bin.bin2 - cur_norm[2])
+
+        m = max((bin.bin2, cur_norm[2]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[2]/float(m) )
+    
+        norm_diff[3] = abs(bin.bin3 - cur_norm[3])
+
+        m = max((bin.bin3, cur_norm[3]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[3]/float(m) )
+
+        norm_diff[4] = abs(bin.bin4 - cur_norm[4])
+        m = max((bin.bin4, cur_norm[4]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[4]/float(m) )
+
+        norm_diff[5] = abs(bin.bin5 - cur_norm[5])
+
+        m = max((bin.bin5, cur_norm[5]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[5]/float(m) )
+        norm_diff[6] = abs(bin.bin6 - cur_norm[6])
+
+        m = max((bin.bin6, cur_norm[6]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[6]/float(m) )
+
+        norm_diff[7] = abs(bin.bin7 - cur_norm[7])
+        
+        m = max((bin.bin7, cur_norm[7]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[7]/float(m) )
+
+        norm_diff[8] = abs(bin.bin8 - cur_norm[8])
+        m = max((bin.bin8, cur_norm[8]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[8]/float(m) )
+        norm_diff[9] = abs(bin.bin9 - cur_norm[9])
+        m = max((bin.bin9, cur_norm[9]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[9]/float(m) )
+
+        norm_diff[10] = abs(bin.bin10 - cur_norm[10])
+        m = max((bin.bin10, cur_norm[10]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[10]/float(m) )
+        norm_diff[11] = abs(bin.bin11 - cur_norm[11])
+        m = max((bin.bin11, cur_norm[11]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[11]/float(m) )
+        norm_diff[12] = abs(bin.bin12 - cur_norm[12])
+
+        m = max((bin.bin12, cur_norm[12]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[12]/float(m) )
+
+        norm_diff[13] = abs(bin.bin13 - cur_norm[13])
+
+        m = max((bin.bin13, cur_norm[13]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[13]/float(m) )
+
+        norm_diff[14] = abs(bin.bin14 - cur_norm[14])
+
+        m = max((bin.bin14, cur_norm[14]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[14]/float(m) )
+        norm_diff[15] = abs(bin.bin15 - cur_norm[15])
+        m = max((bin.bin15, cur_norm[15]))
+         
+        if m != 0:
+            res.percent += abs( norm_diff[15]/float(m) )
     return 
 
 
@@ -241,13 +345,13 @@ def calculate_hist(path, t):
             
         else:
             hist16bin[bin_count] += hist[i]
-    """        
+            
     print "\n\n"
     print "16 Bin histogram: ", hist16bin
     print 
     print "Size: ", len(hist16bin)
     print "Original Size: ", len(hist)
-    """
+    
     # Now we put the normal histogram in the database
 
     normal = Histograms()
