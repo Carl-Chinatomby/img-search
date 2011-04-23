@@ -1,6 +1,20 @@
 Project Specification
 =====================
 
+
+# Details
+
+We use libraries wherever we can. Notably, we use three imporant python 
+libraries:
+
+## PIL
+### Python Image Library
+
+We use it to read images, and count histograms.
+
+
+
+
 ### Note: 
 This is meant to be a group work. Each group may have up to three members.
 

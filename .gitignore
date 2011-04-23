@@ -2,6 +2,6 @@
 ~
 *.png
 #*.jpg
-*.gif
+#*.gif
 *.bmp
 *.dat
