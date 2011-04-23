@@ -13,6 +13,13 @@ libraries:
 We use it to read images, and count histograms.
 
 
+## Image Histograms
+
+Image histograms are calculated on the fly, when a user uploads a picture.
+The edge map image is generated on the fly as well, and stored in the images
+folder as tmp.jpg.  Soon after, both the normal image histogram and edge map
+histograms are calculated, and stored in the sqlite3 database.
+
 
 
 ### Note: 

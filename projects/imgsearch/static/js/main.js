@@ -1,5 +1,6 @@
 $(document).ready(function(){
     $("#image").hide();
+    $("#spinner").hide();
     $("#left").click(function(){
         if( $("#left").is(":checked") ){
             $("#image").show("slow");
@@ -18,6 +19,7 @@ $(document).ready(function(){
     });
 
     $("#sub").click(function(){
+        
         if ($("#left").is(":checked") && $("#img_file").val() == ''){
             alert("Need to specify a file to search by!");
         }
@@ -25,7 +27,8 @@ $(document).ready(function(){
             alert("Please specify at least on search parameter!");
             return;
         }
-        else {
+        else {  
+            $("#spinner").show();
             $("#txt").submit();
         }
     });

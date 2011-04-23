@@ -13,6 +13,9 @@ import StringIO
 from PIL import Image, ImageDraw
 
 
+import json
+
+
 #This needs to point to your repository static/image folder!
 IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
 
@@ -52,6 +55,23 @@ def handle_img_upload(f):
     # At this point, the file is in the images folder, and we can
     # do processing on it.
 
+    calculate_hist(path)
+        
+
+    # Next, we generate a edge map.  We can use various 
+    # methods, but I went with the easiest for this, which is a basic gradient edge detection
+
+    gradient(path, tmp_file)
+
+    
+    #Finally, we calculate the edge map histogram
+    calculate_hist(tmp_file)
+    
+
+    return
+
+def calculate_hist(path):
+    """ Returns a length 16 list """
     try:
         image = Image.open(path)
     except IOError:
@@ -115,16 +135,8 @@ def handle_img_upload(f):
     normal.bin15 = hist16bin[15]
 
     normal.save()
-        
 
-    # Next, we generate a edge map.  We can use various 
-    # methods, but I went with the easiest for this, which is a basic gradient edge detection
-
-    gradient(path, tmp_file)
-    
-
-    return
-
+    return hist16bin
 
 def gradient(filename, new_filename):
     """ This function generates a edge map on the given
@@ -196,12 +208,12 @@ def gradient(filename, new_filename):
 
 def img_only_search(f):
    
-    print "Filename ", f.name
-    """
-    print IMAGE_DIR + '/' + f.name
+    
+    tmp_img = IMAGE_DIR + '/cur_pic.jpg'
+    tmp_img_edge = IMAGE_DIR + '/cur_pic_edge.jpg'
+
     try:    
-        o = open(IMAGE_DIR + '/' + f.name, "wb")
-        
+        o = open(tmp_img, "wb")
         
     except IOError:
         print "Error opening file for writing!"
@@ -213,9 +225,20 @@ def img_only_search(f):
     
     f.close()
     o.close()
-    """
+    
 
-    return
+    ## Now, we calculate the edge and intensity histograms of this image...
+
+    norm_hist = calculate_hist(tmp_img)
+    gradient(tmp_img, tmp_img_edge)
+    edge_hist = calculate_hist(tmp_img_edge)
+
+    #Now, we pass the information to the calling method so we can pass it 
+    #to the template for display
+
+   
+
+    return [norm_hist, edge_hist]
 
 def main(request):
     
@@ -254,7 +277,8 @@ def results(request):
             pass
 
         elif img != None and text == None:
-            # img only search
+            # img only search   
+           
             print  " img: ", request.FILES['img_file'].content_type
 
             if request.FILES['img_file'].content_type != "image/jpeg":
@@ -262,10 +286,13 @@ def results(request):
 
             form = UploadFile(request.POST, request.FILES['img_file'])
 
-            img_only_search(request.FILES['img_file'])
+            histograms = img_only_search(request.FILES['img_file'])
 
+            
 
-
+            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': ''})
+            
+            #return render_to_response("results/index.html", context_instance=RequestContext(request))
             pass
 
         elif img != None and text != None:
