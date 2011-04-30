@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    <link rel='stylesheet' href="{{ STATIC_PREFIX }}css/upload.css" type='text/css' />
+{% endblock %}
+
+{% block js %}
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/upload.js"></script>
+{% endblock %}
+
+{% block content %}
+  <form id='i' action='/upload_file/' method='post' enctype='multipart/form-data'>
+ <div style='float: left; width: 100%; text-align: center;'>
+    <a style='font-size: 18px;' href="/">Back To Search</a><br /> <br /> <br />
+ </div>
+ <div style='float: left; width: 100%;'>
+ <div id='upload'>
+    
+    <span style='font-size: 16px;'>Upload <span style='color: rgb(80,80,255);'>Grayscale Image (Jpeg Only)</span> </span>  <br /><br /> 
+
+    
+    	{% csrf_token %}
+    	 <input id='img' name='img' type='file' />
+    
+
+	<br />
+    <br /><br />
+    <div id='spinner'>
+        <img src="/static/images/ajax-loader.gif" /> &nbsp; &nbsp; &nbsp; Uploading...
+    </div>
+    <br />
+    <br />
+    <u>or</u>
+    <br /><br /><br />
+
+    <span style='font-size: 16px;'>Upload <span style='color: rgb(80,80,255);'>Grayscale Video (MPG4 Only)</span></span> <br /><br />   <input id='vid' type='file' /> <br />
+    <br />
+ </div>
+ <div id='submitpart'>
+    <div style='width:100%;'>
+        <span > Title </span> <br /> <input class='rounded' name='title' id='title' type='text' size='20' /> <br /> <br />
+        <span> Description </span><br/>
+        <textarea class='rounded' cols='30' rows='5'  id='texta' name='textarea'></textarea>
+        <div style='width:100%;  text-align: right;'>
+            <input class='rounded' id='sub' type='button' value="Upload" />
+        </div>
+    </div>
+    
+ </div>
+ 
+ </div>
+</form>
+
+{% endblock %}

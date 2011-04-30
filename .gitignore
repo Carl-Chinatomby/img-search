@@ -2,7 +2,7 @@
 ~
 *~
 *.png
-*.jpg
-*.gif
+#*.jpg
+#*.gif
 *.bmp
 *.dat

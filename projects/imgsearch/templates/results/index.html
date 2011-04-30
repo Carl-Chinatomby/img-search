@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    <link rel='stylesheet' href="{{ STATIC_PREFIX }}css/results.css" type='text/css' />
+{% endblock %}
+
+{% block js %}
+    <!--<script type='text/javascript' src="{{ STATIC_PREFIX }}js/results.js"></script>-->
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/raphael-min.js"></script>
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/g.raphael-min.js"></script>
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/g.bar-min.js"></script>
+
+    <script type='text/javascript'>
+        $(document).ready(function(){
+    
+    var res = {{ histograms }};
+    
+    var data1 = [];
+    var data2 = [];
+
+    data1.push(res[0]);
+    data2.push(res[1]);
+
+
+
+    var graph = Raphael("stat", 168, 148);
+    var graph2 = Raphael("stat2", 168, 148);
+
+    var fin = function () {
+        this.flag = graph.g.popup(this.bar.x, this.bar.y, this.bar.value || "0").insertBefore(this);
+    }
+    var fout = function () {
+        this.flag.animate({opacity: 0}, 300, function () {this.remove();});
+    }
+    var fin2 = function () {
+        this.flag = graph.g.popup(this.bar.x, this.bar.y, this.bar.value || "0").insertBefore(this);
+    }
+    var fout2 = function () {
+        this.flag.animate({opacity: 0}, 300, function () {this.remove();});
+    }
+
+    //graph.g.text(70,10, "(Hover Over Bar Values)");
+    graph.g.barchart(5, 5, 168, 158, data1, 0, {type: "sharp"}).hover(fin, fout);
+    graph2.g.barchart(5, 5, 168, 158, data2, 0, {type: "sharp"}).hover(fin2, fout2);
+});
+    </script>
+
+{% endblock %}
+
+{% block content %}
+ <div style='float: left; width: 100%; text-align: center;'>
+    <a style='font-size: 18px;' href="/">Back To Search</a><br /> <br /> <br />
+ </div>
+
+ <div style='float: left; width: 100%;'> 
+    
+    <div id="orig">
+        
+        <div style='width:20%; float: left;'>
+            <div> Original Image </div>
+            <br />
+            <img src='{{ STATIC_PREFIX }}images/{{ img_path }}' width="128px" height="128px" alt="Original Pic" />
+            
+        </div>
+        <div style='width:20%; float: left;'>
+            <div> Edge Map </div>
+            <br />
+            <img src='{{ STATIC_PREFIX }}images/cur_pic_edge.jpg' width="128px" height="128px" alt="Original Pic" />
+            
+        </div>
+        <div class='r' style='width:22%; float: left; border: 1px solid black;  padding: 1% 1% 1% 1%;'>
+           <div style='width: 39%; float: left;'>
+            <div> Original Image Histogram </div>
+            <br />
+            <div id='stat'>
+
+            </div> 
+           
+           </div>
+           <!--
+           <div style='width: 59%; float: left'>
+            <span style='color: rgb(100,100,180); font-size: 18px;'>Query:</span> {{ query }} <br /><br />
+            Threshold: <input id='thresh' size='10' type='text' />
+           </div>-->
+           
+        </div>
+        <div class='r' style='width:22%; float: left; border: 1px solid black; padding: 1% 1% 1% 1%;'>
+           <div style='width: 39%; float: left;'>
+            <div> Edge Map Image Histogram </div>
+            <br />
+            <div id='stat2'>
+                
+            </div> 
+            
+           </div>
+           
+        </div>
+    </div>
+    
+ </div>
+ <div style='float: left; width: 100%; text-align: center; font-size: 18px;'>
+    <hr />
+    <br />
+    Results
+ </div>
+ <div style='float: left; width: 100%;'>
+    <div id='results'>
+    <div class='res'>
+        1. <a href='#'>Wolf.jpg</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: 88.8%
+        <hr />
+    </div>
+    <div class='res'>
+        2. <a href='#'>eudis.jpg</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: 57.8%
+        <hr />
+    </div>
+    <div class='res'>
+        3. <a href='#'>carl.jpg</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: 8.8%
+        <hr />
+    </div>
+    
+    </div>
+ </div>
+
+{% endblock %}

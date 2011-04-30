@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    <link rel='stylesheet' href="{{ STATIC_PREFIX }}css/upload.css" type='text/css' />
+{% endblock %}
+
+{% block js %}
+    <script type='text/javascript'>
+        setTimeout(function(){
+                        window.location = "/";
+                    },
+                    3000);
+    </script>
+{% endblock %}
+
+{% block content %}
+ <div style='float: left; width: 100%; text-align: center; color: rgb(100,100,255); font-size: 18px;'>
+    Image Successfully Uploaded.  Redirecting in 3 seconds...
+ </div>
+ 
+
+{% endblock %}

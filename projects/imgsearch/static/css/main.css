@@ -1,0 +1,39 @@
+/* Main CSS file */
+
+
+#search {
+    width: 100%;
+    
+}
+
+#text {
+    width: 100%;
+    
+    text-align: center;
+}
+
+#search_box {
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+
+#image {
+    width: 100%;
+    text-align: center;
+    float: left;
+}
+
+#upload {
+    width: 100%;
+    text-align: center;
+    float: left;
+}
+
+#upload a {
+    text-decoration: none;
+}
+
+#upload a:hover {
+    font-size: 16px;
+}

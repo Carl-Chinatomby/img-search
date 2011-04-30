@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block css %}
+    {% load static %}
+    {% get_static_prefix as STATIC_PREFIX %}
+    <link rel='stylesheet' href="{{ STATIC_PREFIX }}css/main.css" type='text/css' />
+{% endblock %}
+
+{% block js %}
+    <script type='text/javascript' src="{{ STATIC_PREFIX }}js/main.js"></script>
+{% endblock %}
+
+{% block content %}
+ <div id='upload'>
+    <a href="/upload">Upload File</a>
+    <br />
+    <br />
+    <br />
+ </div>
+
+ <div id='search'>
+    <form id='txt' action='/results/' enctype='multipart/form-data' method="POST">
+        {% csrf_token %}
+        <div id='text'>
+            <input id='search_box' name='search_box' type='text' size='30' />
+            <input id='sub' type="button" value="Submit" />
+        </div> 
+
+        <div id='image'>
+            <br />
+            <div id='spinner'>
+                <br />
+                <br />
+                <br />
+                <span style='font-size: 16px; color: rgb(70, 70, 70);'>Uploading, Indexing, and Searching...</span> <img src='/static/images/ajax-loader.gif' />
+                <br />
+                <br />
+                <br />
+            </div>
+            <br />
+            <input id="img_file" name='img_file' type='file' />
+            <br />
+        </div>
+    </form>
+
+    <div style='width: 100%; float: left; text-align: center;'>
+        <div style='width: 50%; margin: auto;'>
+        <br />
+        <hr />
+        </div>
+    </div>
+    <div style='width: 100%; float: left; text-align: center;'>
+        <br />
+        
+        Include Image Search? <br /> 
+        
+        <input id='left' type='radio' name='group' value="Yes" /> Yes  &nbsp; &#149; &nbsp; <input id='right' type='radio' name='group' value='No'/> No
+       
+        <br />
+    </div>
+    
+    
+
+ </div>
+ 
+{% endblock %}

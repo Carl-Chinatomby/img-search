@@ -1,0 +1,49 @@
+#results {
+    width: 70%;
+    margin: auto;
+    text-align: center;
+    padding: 2% 2% 3% 2%;
+    border: 1px solid gray;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radisu: 5px;
+}
+
+
+#orig {
+    width: 70%;
+    margin: auto;
+    text-align: left;
+    padding: 2% 2% 3% 2%;
+}
+
+#stat {
+    width: 168px;
+    height: 148px;
+    
+    
+    border-radius: 5px;
+}
+
+#stat2 {
+    width: 168px;
+    height: 148px;
+    
+   
+    border-radius: 5px;
+    
+}
+
+.r{
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border: 1px solid gray;
+}
+
+.res {
+    width: 70%;
+    border: 1px solid rgb(200,200,200);
+    padding: 1% 1% 1% 1%;
+    margin: auto;
+    text-align: left;
+}
