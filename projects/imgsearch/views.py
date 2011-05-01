@@ -15,13 +15,15 @@ from PIL import Image, ImageDraw
 
 import json
 
+import sys
 
 #This needs to point to your repository static/image folder!
-IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/devastator/git/img-search/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
-VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-
+#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+VIDEO_DIR = '/home/devastator/git/img-search/projects/imgsearch/static/videos'
 
 
 
@@ -120,6 +122,8 @@ def handle_img_upload(f):
     path = IMAGE_DIR + '/' + f.name
     tmp_file = IMAGE_DIR + '/tmp.jpg'
 
+    print path
+    
     try:    
         o = open(path, "wb")
         
@@ -137,9 +141,7 @@ def handle_img_upload(f):
 
     # At this point, the file is in the images folder, and we can
     # do processing on it.
-
     calculate_hist(path, 'n')
-        
 
     # Next, we generate a edge map.  We can use various 
     # methods, but I went with the easiest for this, which is a basic gradient edge detection
@@ -167,9 +169,12 @@ def calculate_hist(path, t):
     #print "Histogram: ", image.histogram()
 
     # However, we must make it a 16 bin historgram.
-
-    hist = image.histogram()
-    
+    try:
+        hist = image.histogram()
+    except:
+        print "Unexpected error:", sys.exc_info()
+        exit(0)
+        
     hist16bin = []
 
     start = 0
@@ -429,9 +434,7 @@ def upload_file(request):
                 test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
                 if test_grayscale.mode != 'L':
                     return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
-                
                 handle_img_upload(request.FILES['img'])
-
 
                 # We know that the normal histogram is inserted into the database
                 # first, and the edge second, so we can do this hack:
@@ -447,15 +450,13 @@ def upload_file(request):
                 print int(edge_id)
                 print str(request.POST['title'])
                 print str(request.POST['textarea'])
-
+                
                 img.filename = str(request.FILES['img'].name)
                 img.orig_hist = int(norm_id)
                 img.edge_hist = int(edge_id)
                 img.title = str(request.POST['title'])
                 img.description = str(request.POST['textarea'])
-
                 img.save()
-                
 
                 return HttpResponseRedirect('/upload/complete')
             else:
@@ -467,4 +468,28 @@ def upload_file(request):
         return HttpResponse("Error During Upload")
         
     return render_to_response("upload/index.html", { 'form':form} )
+   
+
+STOP_WORDS = ['I', 'a', 'about', 'an', 'are', 'as', 'at', 'be', 'by', 'com', 
+'for', 'from', 'how', 'in', 'is', 'it', 'of', 'on', 'or', 'that', 'the', 
+'this', 'to', 'was', 'what', 'when', 'where', 'who', 'will', 'with', 'the',
+'www',
+]
+
+def index_img_kw(title, descripton):
+    #build frequency table for the keywords
+    frequencies = {}
+    title_kws = title.split()
+    des_kws = description.split()
     
+    #titles count as double weight
+    for word in title_kws:
+        if word not in STOP_WORDS:
+            frequencies[word] = frequencies[word] + 2 if word in frequencies else 2
+            
+    for word in des_kws:
+        if word not in STOP_WORDS:
+            frequencies[word] = frequencies[word] + 1 if word in frequencies else 1
+    
+    #Save in database now for this image
+    kw = Keywords()

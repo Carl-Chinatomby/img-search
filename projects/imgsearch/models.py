@@ -32,3 +32,7 @@ class Images(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
 
+class Keywords(models.Model):
+    keyword = models.TextField()
+    image_id = models.IntegerField()
+    frequency = models.IntegerField()
