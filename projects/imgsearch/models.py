@@ -33,6 +33,10 @@ class Images(models.Model):
     description = models.TextField()
 
 class Keywords(models.Model):
+    """
+    This model stores the keyword and frequency
+    for each image
+    """
     keyword = models.TextField()
     image_id = models.ForeignKey(Images)
     frequency = models.IntegerField()

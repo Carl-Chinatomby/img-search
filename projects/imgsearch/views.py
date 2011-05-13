@@ -478,6 +478,11 @@ STOP_WORDS = ['I', 'a', 'about', 'an', 'are', 'as', 'at', 'be', 'by', 'com',
 ]
 
 def index_img_kw(image_id, title, descripton):
+    """
+    Parses the the title and description and creates a frequency table,
+    then stores the frequencies into the Keywords table for the given
+    image_id
+    """
     #build frequency table for the keywords
     frequencies = {}
     title_kws = title.split()
@@ -500,4 +505,3 @@ def index_img_kw(image_id, title, descripton):
         kw.image_id = image_id
         kw.save()
         
-    
