@@ -19,11 +19,11 @@ import sys
 
 #This needs to point to your repository static/image folder!
 #IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
-IMAGE_DIR = '/home/devastator/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
 #VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-VIDEO_DIR = '/home/devastator/git/img-search/projects/imgsearch/static/videos'
+VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 
 
 
