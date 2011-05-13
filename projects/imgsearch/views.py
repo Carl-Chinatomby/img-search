@@ -7,7 +7,7 @@ from django.shortcuts import render_to_response
 from django import forms
 from django.db import models
 
-from imgsearch.models import Histograms, Images
+from imgsearch.models import Histograms, Images, Keywords
 
 import StringIO
 from PIL import Image, ImageDraw
@@ -357,12 +357,11 @@ def results(request):
                 text = None
         except: 
             text = None
-
         print "text ", text, " img: ", img
         
         if img == None and text != None:
             # text only search
-            pass
+            text_only_search(text)
 
         elif img != None and text == None:
             # img only search   
@@ -477,31 +476,55 @@ STOP_WORDS = ['I', 'a', 'about', 'an', 'are', 'as', 'at', 'be', 'by', 'com',
 'www',
 ]
 
-def index_img_kw(image_id, title, descripton):
+def index_img_kw(image_id, title, description):
     """
     Parses the the title and description and creates a frequency table,
     then stores the frequencies into the Keywords table for the given
     image_id
     """
+    print "in this function"
     #build frequency table for the keywords
     frequencies = {}
     title_kws = title.split()
     des_kws = description.split()
-    
     #titles count as double weight
     for word in title_kws:
         if word not in STOP_WORDS:
+            word = word.lower()
             frequencies[word] = frequencies[word] + 2 if word in frequencies else 2
-            
+    print "title frequencies are"
+    print frequencies
+    
     for word in des_kws:
         if word not in STOP_WORDS:
+            word = word.lower()
             frequencies[word] = frequencies[word] + 1 if word in frequencies else 1
     
+    print "frequencies after the descriptions are"
+    print frequencies
+    
     #Save in database now for this image
-    for entry, val in frequencies:
+    for entry, val in frequencies.items():
+        print "aboue to save"
+        print str(entry) + ', ' + str(val)
         kw = Keywords()
-        kw.keyword = entry
+        kw.keyword = entry.lower()
         kw.frequency = val
-        kw.image_id = image_id
+        print "the image id is" + str(image_id)
+        kw.image_id = int(image_id)
+        print "passed setting the id"        
         kw.save()
         
+def text_only_search(text):
+    search_words = text.split()
+    
+    results = []
+    #exact keyword matches
+    for word in search_words:
+        if word not in STOP_WORDS:
+           cur_res = Keywords.objects.filter(keyword__iexact=word).order_by('-frequency')  
+           results.append(cur_res)
+           print results
+    #substring matches
+    
+    #edit distance matches

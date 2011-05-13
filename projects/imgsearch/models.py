@@ -38,5 +38,5 @@ class Keywords(models.Model):
     for each image
     """
     keyword = models.TextField()
-    image_id = models.ForeignKey(Images)
+    image = models.ForeignKey(Images)
     frequency = models.IntegerField()
