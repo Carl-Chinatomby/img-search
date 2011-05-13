@@ -456,7 +456,7 @@ def upload_file(request):
                 img.title = str(request.POST['title'])
                 img.description = str(request.POST['textarea'])
                 img.save()
-                index_img_kw(img.id, img.title, img.description)
+                index_img_kw(img, img.title, img.description)
 
                 return HttpResponseRedirect('/upload/complete')
             else:
@@ -476,7 +476,7 @@ STOP_WORDS = ['I', 'a', 'about', 'an', 'are', 'as', 'at', 'be', 'by', 'com',
 'www',
 ]
 
-def index_img_kw(image_id, title, description):
+def index_img_kw(img, title, description):
     """
     Parses the the title and description and creates a frequency table,
     then stores the frequencies into the Keywords table for the given
@@ -504,16 +504,17 @@ def index_img_kw(image_id, title, description):
     print frequencies
     
     #Save in database now for this image
-    for entry, val in frequencies.items():
-        print "aboue to save"
-        print str(entry) + ', ' + str(val)
-        kw = Keywords()
-        kw.keyword = entry.lower()
-        kw.frequency = val
-        print "the image id is" + str(image_id)
-        kw.image_id = int(image_id)
-        print "passed setting the id"        
-        kw.save()
+    try:
+        for entry, val in frequencies.items():
+        
+            kw = Keywords()
+            kw.keyword = entry.lower()
+            kw.frequency = val
+            kw.image = img
+            kw.save()
+    except:
+        print sys.exc_info()
+       
         
 def text_only_search(text):
     search_words = text.split()
