@@ -34,7 +34,14 @@ class QueryResult:
         self.histogram = None
         self.percent = 0.0
         self.rank = 0.0
-
+    
+    def __cmp__(self, other):
+        if self.precent < other.percent:
+            return -1
+        elif self.precent == other.percent:
+            return 0
+        else:
+            return 1
 
 def img_rank(histograms):
     
@@ -52,7 +59,7 @@ def img_rank(histograms):
 
 
     """
-    Each bin represents a different picture in the database.  What I'm doing
+    Each histogram represents a different picture in the database.  What I'm doing
     here is simply comparing the current pictures histogram (bin by bin) with 
     all of the picutures histograms which are stored in the database.  This first
     case is only for the normal images.  The next case is for the edge map.
@@ -115,11 +122,21 @@ def img_rank(histograms):
     
     # return both results
 
+    
+    print result
     return [result, result1]
 
 
 class UploadFile(forms.Form):
     name = models.ImageField()
+
+def mysorted(mylist):
+
+   
+
+    
+
+    return l
     
 
 def handle_img_upload(f):
@@ -389,6 +406,7 @@ def results(request):
             histograms = img_only_search(request.FILES['img_file'])
 
             results = img_rank(histograms)
+            
             """
             # fill in some details, life filename etc.
             for i in results[0]:

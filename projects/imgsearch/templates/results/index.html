@@ -107,19 +107,17 @@
  </div>
  <div style='float: left; width: 100%;'>
     <div id='results'>
-    <div class='res'>
-        1. <a href='#'>Wolf.jpg</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: 88.8%
-        <hr />
-    </div>
-    <div class='res'>
-        2. <a href='#'>eudis.jpg</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: 57.8%
-        <hr />
-    </div>
-    <div class='res'>
-        3. <a href='#'>carl.jpg</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: 8.8%
-        <hr />
-    </div>
-    
+
+        <ol style='overflow-x: hidden; overflow-y: auto;'>
+        {% for i in results %}
+            {% for j in i %}
+             <li class='res'>
+                <a href='#'>{{ j.filename }}</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                <hr />
+            </li>
+            {% endfor %}
+        {% endfor %}
+        </ol>  
     </div>
  </div>
 
