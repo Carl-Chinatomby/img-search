@@ -12,6 +12,7 @@ from imgsearch.models import Histograms, Images, Keywords
 import StringIO
 from PIL import Image, ImageDraw
 
+from itertools import chain
 
 import json
 
@@ -519,13 +520,57 @@ def index_img_kw(img, title, description):
 def text_only_search(text):
     search_words = text.split()
     
+    #remove duplicates
+    search_words = list(set(search_words))
+    
     results = []
     #exact keyword matches
     for word in search_words:
         if word not in STOP_WORDS:
            cur_res = Keywords.objects.filter(keyword__iexact=word).order_by('-frequency')  
-           results.append(cur_res)
-           print results
+           results = list(chain(results, cur_res))
+
+    print results
+           #now we need to rank the results for images based on most exact matches
+    rankedres = rank_results(results)
+    
     #substring matches
     
     #edit distance matches
+    
+    return results
+    
+def rank_results(results):
+    """
+    retuns results ranked by the highest points. The formula used
+    to calculate points is: points = #keywords_matched * cumfreq
+    """
+    #we're going to create a table based on image, number of keywords matched 
+    #and use frequency to break the ties
+    
+    #image, frequency, keywords, points (points = #of keywords * cumfreq)
+    ranked_res = []
+    frequency = {}
+    kwnum = {}
+    points = {}
+    
+    print "in ranking"
+    for result in results:
+        imgid = result.image.id
+        if imgid in frequency:
+            frequency[imgid] += result.frequency
+            kwnum[imgid] += 1
+        else:
+            frequency[result.image.id] = result.frequency
+            kwnum[imgid] = 1
+        
+        points[imgid] = frequency[imgid] * kwnum[imgid]
+    
+    
+    print "the frequency are: "    
+    print frequency
+    print "the kwnum are: "    
+    print kwnum
+    print "the points are: "    
+    print points     
+   
