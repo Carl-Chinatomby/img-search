@@ -518,23 +518,26 @@ def index_img_kw(img, title, description):
        
         
 def text_only_search(text):
+    """
+    performs a search and ranks results based on the text given (splits into individual words)
+    """
     search_words = text.split()
     
     #remove duplicates
     search_words = list(set(search_words))
     
     results = []
-    #exact keyword matches
+    #exact keyword matches incase-sensitive
     for word in search_words:
         if word not in STOP_WORDS:
            cur_res = Keywords.objects.filter(keyword__iexact=word).order_by('-frequency')  
            results = list(chain(results, cur_res))
 
     print results
-           #now we need to rank the results for images based on most exact matches
-    rankedres = rank_results(results)
+    #now we need to rank the results for images based on most exact matches
+    ranked_res = rank_results(results)
     
-    #substring matches
+    #substring matches incase-sensitive
     
     #edit distance matches
     
@@ -565,12 +568,6 @@ def rank_results(results):
             kwnum[imgid] = 1
         
         points[imgid] = frequency[imgid] * kwnum[imgid]
-    
-    
-    print "the frequency are: "    
-    print frequency
-    print "the kwnum are: "    
-    print kwnum
-    print "the points are: "    
-    print points     
-   
+    ranked_res = sorted(points, key=points.__getitem__, reverse=True)
+
+    return ranked_res
