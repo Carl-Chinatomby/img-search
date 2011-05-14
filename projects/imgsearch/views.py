@@ -17,6 +17,8 @@ from PIL import Image, ImageDraw
 from itertools import chain
 from operator import itemgetter
 
+from edit_dist import EditDistance
+
 import json
 
 import sys
@@ -530,13 +532,15 @@ def text_only_search(text):
     search_words = list(set(search_words))
     
     results = []
-    sub_res = []
+    ed = EditDistance(Keywords, 'keyword')
+
     #exact and substring keyword matches incase-sensitive
     for word in search_words:
         if word not in STOP_WORDS:
            cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)"}, select_params=[word]).filter(keyword__contains=word).order_by('diff','-frequency')
            results = list(chain(results, cur_res))
            print cur_res
+           ed.correct(word)
            #for res in cur_res:
            #   for kw in res:
            #    print "Keyword %s has frequency %d and diff %d" % (res.keyword, res.frequency, res.diff)
@@ -594,6 +598,3 @@ def rank_results(results):
     ranked_res = [ x[0] for x in ranked_diff ] 
     print ranked_res
     return ranked_res
-
-def edit_distance(word):
-    pass
