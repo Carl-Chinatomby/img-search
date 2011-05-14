@@ -7,6 +7,8 @@ from django.shortcuts import render_to_response
 from django import forms
 from django.db import models
 
+#import django.utils.datastructures.SortedDict
+
 from imgsearch.models import Histograms, Images, Keywords
 
 import StringIO
@@ -527,11 +529,16 @@ def text_only_search(text):
     search_words = list(set(search_words))
     
     results = []
-    #exact keyword matches incase-sensitive
+    sub_res = []
+    #exact and substring keyword matches incase-sensitive
     for word in search_words:
         if word not in STOP_WORDS:
-           cur_res = Keywords.objects.filter(keyword__iexact=word).order_by('-frequency')  
+           cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)"}, select_params=[word]).filter(keyword__contains=word).order_by('diff','-frequency')
            results = list(chain(results, cur_res))
+           print cur_res
+           #for res in cur_res:
+           #   for kw in res:
+           #    print "Keyword %s has frequency %d and diff %d" % (res.keyword, res.frequency, res.diff)
 
     print results
     #now we need to rank the results for images based on most exact matches
@@ -541,7 +548,7 @@ def text_only_search(text):
     
     #edit distance matches
     
-    return results
+    #return results
     
 def rank_results(results):
     """
@@ -556,18 +563,23 @@ def rank_results(results):
     frequency = {}
     kwnum = {}
     points = {}
-    
+    diff = {}
     print "in ranking"
     for result in results:
         imgid = result.image.id
         if imgid in frequency:
             frequency[imgid] += result.frequency
             kwnum[imgid] += 1
+            diff[imgid] += result.diff
         else:
             frequency[result.image.id] = result.frequency
             kwnum[imgid] = 1
+            diff[imgid] = result.diff
         
         points[imgid] = frequency[imgid] * kwnum[imgid]
     ranked_res = sorted(points, key=points.__getitem__, reverse=True)
-
+    print ranked_res
     return ranked_res
+
+def edit_distance(word):
+    pass
