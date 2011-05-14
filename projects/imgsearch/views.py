@@ -29,7 +29,9 @@ VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/vide
 
 class QueryResult:
     def __init__(self):
+        self.id = 0
         self.filename = ''
+        self.histogram = None
         self.percent = 0.0
         self.rank = 0.0
 
@@ -66,16 +68,21 @@ def img_rank(histograms):
             m = max((norm['bin' + str(i)], cur_norm[i]))
             if m != 0:
                 res.percent += abs( 100.0 * (norm_diff[i]/ float(m)) )
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (norm_diff[i]/ float(m)) ))
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (norm_diff[i]/ float(m)) ))
             else:
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                pass
 
             i += 1
             if i >= 16:
                 break
+        res.id = norm['id']
+        #print 
+        #print "ID: ",
+        print res.id
         res.percent = res.percent/16.0
         result.append(res)
-        print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
         j += 1
 
     print "\n Edge Map: "
@@ -90,20 +97,25 @@ def img_rank(histograms):
             m = max((edge['bin' + str(i)], cur_edge[i]))
             if m != 0:
                 res.percent += abs( 100.0 * (edge_diff[i]/ float(m)) )
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (edge_diff[i]/ float(m)) ))
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (edge_diff[i]/ float(m)) ))
             else:
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)      
+                pass
 
             i += 1
             if i >= 16:
                 break
+
+        res.id = norm['id']
         res.percent = res.percent/16.0
         result1.append(res)
-        print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
         j += 1
             
     
-    return 
+    # return both results
+
+    return [result, result1]
 
 
 class UploadFile(forms.Form):
@@ -252,17 +264,22 @@ def gradient(filename, new_filename):
     # Create a drawable object
     draw = ImageDraw.Draw(edge_map)
 
-
+    pix = image.load()
     for x in range(1, image.size[0] - 1):
         for y in range(1, image.size[1] - 1):
             IxVal = 0
             IyVal = 0
             for i in range(3):
                 for j in range(3):
-                    IxVal += Ix[i][j]*image.getpixel((x + i - 1, y + j - 1))
-                    IyVal += Iy[i][j]*image.getpixel((x + i - 1, y + j - 1))
+                    #IxVal += Ix[i][j]*image.getpixel((x + i - 1, y + j - 1))
+                    #IyVal += Iy[i][j]*image.getpixel((x + i - 1, y + j - 1))
+
+                    # This modification should prove to be very fast compared to the above
                     
-                        
+                    IxVal += Ix[i][j]*pix[x + i - 1, y + j - 1]
+                    IyVal += Iy[i][j]*pix[x + i - 1, y + j - 1]
+
+  
             #res = math.sqrt((IxVal**2) + (IyVal**2))        
             res = abs(IxVal) + abs(IyVal)
 
@@ -372,8 +389,15 @@ def results(request):
             histograms = img_only_search(request.FILES['img_file'])
 
             results = img_rank(histograms)
-            
+            """
+            # fill in some details, life filename etc.
+            for i in results[0]:
+                i.filename = Images.objects.filter(id=i.id).values()[0]['filename']
 
+            for i in results[1]:
+                i.filename = Images.objects.filter(id=i.id).values()[0]['filename']
+            
+            """
             return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':results})
             
             #return render_to_response("results/index.html", context_instance=RequestContext(request))
