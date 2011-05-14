@@ -15,6 +15,7 @@ import StringIO
 from PIL import Image, ImageDraw
 
 from itertools import chain
+from operator import itemgetter
 
 import json
 
@@ -564,20 +565,33 @@ def rank_results(results):
     kwnum = {}
     points = {}
     diff = {}
+    ranker = {}
     print "in ranking"
     for result in results:
         imgid = result.image.id
         if imgid in frequency:
+            ranker[imgid] = (ranker[imgid][0] + result.frequency, ranker[imgid][1]+result.diff)
             frequency[imgid] += result.frequency
             kwnum[imgid] += 1
             diff[imgid] += result.diff
         else:
+            ranker[imgid] = (result.frequency, result.diff)
             frequency[result.image.id] = result.frequency
             kwnum[imgid] = 1
             diff[imgid] = result.diff
         
         points[imgid] = frequency[imgid] * kwnum[imgid]
-    ranked_res = sorted(points, key=points.__getitem__, reverse=True)
+
+    #ranked_diff = sorted(diff.iteritems(), key=itemgetter(1), reverse=True)
+    #ranked_diff.reverse()
+    #print ranked_diff
+    #ranked_res = sorted(points, key=points.__getitem__, reverse=True)
+    ranked_freq = sorted(ranker.iteritems(), key=itemgetter(1), reverse=True)
+    #another.reverse()
+    print ranked_freq
+    ranked_diff = sorted(ranked_freq, key=lambda a: -a[1][1], reverse=True)
+    print ranked_diff
+    ranked_res = [ x[0] for x in ranked_diff ] 
     print ranked_res
     return ranked_res
 
