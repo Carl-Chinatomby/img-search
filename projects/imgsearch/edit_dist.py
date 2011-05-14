@@ -1,8 +1,13 @@
 """
+This File Stores The Edit Distance Class used in views.py
+for the text queries 
 """
 
 class EditDistance():
     """
+    Edit Distance Class that performs the Edit Distance algorithm successively on a word
+    until a resultset is found or the len of the word is longer that the count of edit distances.
+    Words with the ORM, and the table and keyword attribute need to be passed in
     """
     def __init__(self, Table, kwattr):
         """
@@ -22,11 +27,15 @@ class EditDistance():
         
     def match(self, word):
         """
+        Returns all the keywords that match 
         """
         return set(w for w in word if w in self.wordlist)
     
     def edit(self, word):
         """
+        performs a 1 character edit distance on the word and tries to match it
+        to the word list
+        Returns a set of the results
         """
         splits     = [(word[:i], word[i:]) for i in range(len(word) + 1)]
         deletes    = [a + b[1:] for a, b in splits if b]
@@ -37,25 +46,31 @@ class EditDistance():
     
     def editRec(self, curres):
         """
+        Performs a recursive edit on the edit results, curres
         """
         return set(edits for curedit in curres for edits in self.edit(curedit) if edits in self.wordlist)
     
     def correct(self, word):
         """
+        Performs successive edit distances on the word up to it's length and returns the result set
+        and the number of edits required for that result set (the diff)
         """
+        #word is exact match so we dont need an edit distance on it
+        if word in self.wordlist:
+            return []
+        
         curedit = self.edit(word)
         editcnt = 1
         results = []
         while not results and editcnt < len(word):
-            
             results = self.match(curedit)
             if not results:
                 curedit = self.editRec(curedit)
                 editcnt += 1
         
-        #verify the word is not in self.wordlist (we take care of this case outside)
         print "result for " + word + " is: "
         print results
         print "after " + str(editcnt) + " edits!"
+        return results, editcnt
         #return max(results, key=self.wordlist.get)
         
