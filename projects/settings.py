@@ -10,11 +10,15 @@ ADMINS = (
 MANAGERS = ADMINS
 
 #Eudis
-BASE = '/home/prototype/repos/git/img-search/projects'
+#BASE = '/home/prototype/repos/git/img-search/projects'
 
 #Carl
 #BASE = '/home/carl/protected/git/img-search/projects'
 #BASE = '/home/carl/git/img-search/projects'
+
+#Server
+BASE = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects'
+MY_MEDIA = '/home5/bluemedi/.local/python2.7/lib/site-packages/projects/imgsearch/static/images'
 
 TEMPLATE_BASE = BASE + "/imgsearch/templates"
 # This defines where all the file uploads go
@@ -72,11 +76,15 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+#STATIC_ROOT = ''
+#Server
+STATIC_ROOT = '/home5/bluemedi/public_html/img/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+#STATIC_URL = '/static/'
+#Server
+STATIC_URL = 'http://img.eudisduran.com/static/'
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
