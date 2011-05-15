@@ -23,6 +23,9 @@ import json
 
 import sys
 
+from imgsearch.video import *
+
+
 #This needs to point to your repository static/image folder!
 #IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
 #IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
