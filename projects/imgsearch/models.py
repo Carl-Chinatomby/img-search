@@ -24,13 +24,33 @@ class Histograms(models.Model):
     
 
 class Images(models.Model):
-
+    """
+    This model stores the image information
+    """
     id = models.AutoField(primary_key=True)
     filename = models.CharField(max_length=255)
     orig_hist = models.IntegerField()
     edge_hist = models.IntegerField()
     title = models.CharField(max_length=255)
     description = models.TextField()
+
+class Clips(models.Model):
+    """
+    This model stores the clip histogram information.
+    """
+    id = models.AutoField(primary_key=True)
+    orig_hist_clips = models.CommaSeparatedIntegerField(max_length=3)
+    edge_hist_clips = models.CommaSeparatedIntegerField(max_length=3)
+    start_filename = models.CharField(max_length=255)
+    mid_filename = models.CharField(max_length=255)
+    end_filename = models.CharField(max_length=255)
+
+class Videos(models.Model):
+    id = models.AutoField(primary_key=True)
+    filename = models.CharField(max_length=255)
+    clips = models.CommaSeparatedIntegerField(max_length=10)
+    title = models.IntegerField()
+    description = models.IntegerField()
 
 class Keywords(models.Model):
     """
