@@ -24,18 +24,19 @@ import json
 import sys
 
 #This needs to point to your repository static/image folder!
-#IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
-IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
-#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
+VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 
 
 
 #class to hold the result to display
 
 class QueryResult:
+    
     def __init__(self):
         self.id = 0
         self.filename = ''
@@ -96,7 +97,8 @@ def img_rank(histograms):
         #print "ID: ",
         print res.id
         res.percent = res.percent/16.0
-        result.append(res)
+        if res.percent != 0:
+            result.append(res)
         #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
         j += 1
 
@@ -123,15 +125,14 @@ def img_rank(histograms):
 
         res.id = norm['id']
         res.percent = res.percent/16.0
-        result1.append(res)
+        if res.percent != 0.0:
+            result1.append(res)
         #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
         j += 1
             
     
     # return both results
-
-    
-    print result
+    #print sorted(result)
     return [result, result1]
 
 
@@ -141,7 +142,7 @@ class UploadFile(forms.Form):
 def mysorted(mylist):
 
    
-
+    
     
 
     return l

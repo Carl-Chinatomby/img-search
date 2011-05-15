@@ -10,11 +10,11 @@ ADMINS = (
 MANAGERS = ADMINS
 
 #Eudis
-#BASE = '/home/prototype/repos/git/img-search/projects'
+BASE = '/home/prototype/repos/git/img-search/projects'
 
 #Carl
 #BASE = '/home/carl/protected/git/img-search/projects'
-BASE = '/home/carl/git/img-search/projects'
+#BASE = '/home/carl/git/img-search/projects'
 
 TEMPLATE_BASE = BASE + "/imgsearch/templates"
 # This defines where all the file uploads go
