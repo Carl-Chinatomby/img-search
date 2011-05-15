@@ -96,9 +96,9 @@ def img_rank(histograms):
         print 
         print "ID: ",
         print res.id
-        #res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
+        res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
         res.percent = res.percent/16.0
-        if res.percent != 0:
+        if res.percent != 100.0:
             result.append(res)
         #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
         j += 1
@@ -128,9 +128,9 @@ def img_rank(histograms):
         print 
         print "ID: ",
         print res.id
-        #res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
+        res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
         res.percent = res.percent/16.0
-        if res.percent != 0.0:
+        if res.percent != 100.0:
             result1.append(res)
         #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
         j += 1
@@ -427,7 +427,22 @@ def results(request):
 
             histograms = img_only_search(request.FILES['img_file'])
 
+
+            """ At this point, the two elements in the results list 
+                correspond to the same image information, but for two
+                histograms, namely normal and edge map histograms.  I
+                interleave the results.
+            """         
             results = img_rank(histograms)
+            res = []
+            for i in range(len(results[0])):
+                if i & 1 == 0:
+                    results[0][i].percent = 100.0 - results[0][i].percent;
+                    res.append(results[0][i])
+                    
+                else:
+                    results[1][i].percent = 100.0 - results[1][i].percent;
+                    res.append(results[1][i])
             
             """
             # fill in some details, life filename etc.
@@ -438,7 +453,7 @@ def results(request):
                 i.filename = Images.objects.filter(id=i.id).values()[0]['filename']
             
             """
-            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':results})
+            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
             
             #return render_to_response("results/index.html", context_instance=RequestContext(request))
             pass
