@@ -27,14 +27,14 @@ from imgsearch.video import *
 
 
 #This needs to point to your repository static/image folder!
-#IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
 #IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
-IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
-#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
 
 
 #class to hold the result to display
@@ -440,6 +440,11 @@ def results(request):
             results = img_rank(histograms)
             res = []
             for i in range(len(results[0])):
+            
+                results[0][i].percent = 100.0 - results[0][i].percent;
+                res.append(results[0][i])
+                    
+                """
                 if i & 1 == 0:
                     results[0][i].percent = 100.0 - results[0][i].percent;
                     res.append(results[0][i])
@@ -447,6 +452,7 @@ def results(request):
                 else:
                     results[1][i].percent = 100.0 - results[1][i].percent;
                     res.append(results[1][i])
+                """
             
             """
             # fill in some details, life filename etc.
@@ -503,43 +509,61 @@ def upload_file(request):
 
     try:
     	if request.method == 'POST':
+            form = None
             
-            form = UploadFile(request.POST, request.FILES['img'])
-            
-            if form.is_valid():
+            try:
+                res = request.FILES['img']
                 
-                #We test to see if the given image is of L band (true Grayscale)
-                test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
-                if test_grayscale.mode != 'L':
-                    return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
-                handle_img_upload(request.FILES['img'])
-
-                # We know that the normal histogram is inserted into the database
-                # first, and the edge second, so we can do this hack:
-                edge_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 1]['id']
-                norm_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 2:len(Histograms.objects.all()) - 1].get()['id']
+                """
+                This part handles the image upload
+                """
+                form = UploadFile(request.POST, request.FILES['img'])
+                if form.is_valid():
                 
-                # Here, we insert the Images information, now that we have the two IDs above.
+                    #We test to see if the given image is of L band (true Grayscale)
+                    test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
+                    if test_grayscale.mode != 'L':
+                        return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
+                    handle_img_upload(request.FILES['img'])
 
-                img = Images()
+                    # We know that the normal histogram is inserted into the database
+                    # first, and the edge second, so we can do this hack:
+                    edge_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 1]['id']
+                    norm_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 2:len(Histograms.objects.all()) - 1].get()['id']
+                
+                    # Here, we insert the Images information, now that we have the two IDs above.
+
+                    img = Images()
                
-                print str(request.FILES['img'].name)
-                print int(norm_id)
-                print int(edge_id)
-                print str(request.POST['title'])
-                print str(request.POST['textarea'])
+                    print str(request.FILES['img'].name)
+                    print int(norm_id)
+                    print int(edge_id)
+                    print str(request.POST['title'])
+                    print str(request.POST['textarea'])
                 
-                img.filename = str(request.FILES['img'].name)
-                img.orig_hist = int(norm_id)
-                img.edge_hist = int(edge_id)
-                img.title = str(request.POST['title'])
-                img.description = str(request.POST['textarea'])
-                img.save()
-                index_img_kw(img, img.title, img.description)
+                    img.filename = str(request.FILES['img'].name)
+                    img.orig_hist = int(norm_id)
+                    img.edge_hist = int(edge_id)
+                    img.title = str(request.POST['title'])
+                    img.description = str(request.POST['textarea'])
+                    img.save()
+                    index_img_kw(img, img.title, img.description)
 
-                return HttpResponseRedirect('/upload/complete')
-            else:
-                return HttpResponse("Invalid form input...")
+                    return HttpResponseRedirect('/upload/complete')
+                else:
+                    return HttpResponse("Invalid form input...")    
+            except:
+               
+                try:
+                    
+                    res = request.FILES['vid']
+                    histograms = get_consecutive_hist(res)
+                    
+                    return HttpResponseRedirect('/upload/complete')
+                    
+                except:
+                    HttpResponse("Error uploading Video!")
+            
         else:
             
             form = UploadFile()

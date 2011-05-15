@@ -37,6 +37,11 @@ $(document).ready(function(){
         }
     });
 
+    $("#format").click(function(){
+        alert("Zipped folder must contain clip folders enumerated starting from 0,"+
+              "such as: clip0, clip1, clip2, etc");
+    });
+
     $("#sub").click(function(){
         if( $("#left").is(":checked") && $("#left_vid").is(":checked")) {
             alert("Video or Image, not both!");
