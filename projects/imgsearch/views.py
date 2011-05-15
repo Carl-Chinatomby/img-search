@@ -92,10 +92,11 @@ def img_rank(histograms):
             i += 1
             if i >= 16:
                 break
-        res.id = norm['id']
-        #print 
-        #print "ID: ",
+        res.id = int(norm['id'])
+        print 
+        print "ID: ",
         print res.id
+        #res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
         res.percent = res.percent/16.0
         if res.percent != 0:
             result.append(res)
@@ -122,8 +123,12 @@ def img_rank(histograms):
             i += 1
             if i >= 16:
                 break
-
-        res.id = norm['id']
+        
+        res.id = int(edge['id'])
+        print 
+        print "ID: ",
+        print res.id
+        #res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
         res.percent = res.percent/16.0
         if res.percent != 0.0:
             result1.append(res)
@@ -177,7 +182,7 @@ def handle_img_upload(f):
 
     # At this point, the file is in the images folder, and we can
     # do processing on it.
-    calculate_hist(path, 'n')
+    calculate_hist(path, 'n', True)
 
     # Next, we generate a edge map.  We can use various 
     # methods, but I went with the easiest for this, which is a basic gradient edge detection
@@ -186,13 +191,19 @@ def handle_img_upload(f):
 
     
     #Finally, we calculate the edge map histogram
-    calculate_hist(tmp_file, 'e')
+    calculate_hist(tmp_file, 'e', True)
     
 
     return
 
-def calculate_hist(path, t):
-    """ Returns a length 16 list """
+def calculate_hist(path, t, flag):
+    """ Returns a length 16 list
+        The third parameter is a flag.  It says that if it's set
+        to false, we should not put the calcuated histograms in the
+        database.  And we should if it's true.  This came about because
+        of the fact that search image histograms do not need to be put in the database
+        while uploaded images do.  And since I use the same function to calculate the
+        histograms there is no need to rewrite code, just set a flag."""
     try:
         image = Image.open(path)
     except IOError:
@@ -238,27 +249,27 @@ def calculate_hist(path, t):
     print "Size: ", len(hist16bin)
     print "Original Size: ", len(hist)
     
-    # Now we put the normal histogram in the database
-
-    normal = Histograms()
-    normal.bin0 = hist16bin[0]
-    normal.bin1 = hist16bin[1]
-    normal.bin2 = hist16bin[2]
-    normal.bin3 = hist16bin[3]
-    normal.bin4 = hist16bin[4]
-    normal.bin5 = hist16bin[5]
-    normal.bin6 = hist16bin[6]
-    normal.bin7 = hist16bin[7]
-    normal.bin8 = hist16bin[8]
-    normal.bin9 = hist16bin[9]
-    normal.bin10 = hist16bin[10]
-    normal.bin11 = hist16bin[11]
-    normal.bin12 = hist16bin[12]
-    normal.bin13 = hist16bin[13]
-    normal.bin14 = hist16bin[14]
-    normal.bin15 = hist16bin[15]
-    normal.hist_type = t
-    normal.save()
+    # Now we put the histogram in the database
+    if flag == True:
+        normal = Histograms()
+        normal.bin0 = hist16bin[0]
+        normal.bin1 = hist16bin[1]
+        normal.bin2 = hist16bin[2]
+        normal.bin3 = hist16bin[3]
+        normal.bin4 = hist16bin[4]
+        normal.bin5 = hist16bin[5]
+        normal.bin6 = hist16bin[6]
+        normal.bin7 = hist16bin[7]
+        normal.bin8 = hist16bin[8]
+        normal.bin9 = hist16bin[9]
+        normal.bin10 = hist16bin[10]
+        normal.bin11 = hist16bin[11]
+        normal.bin12 = hist16bin[12]
+        normal.bin13 = hist16bin[13]
+        normal.bin14 = hist16bin[14]
+        normal.bin15 = hist16bin[15]
+        normal.hist_type = t
+        normal.save()
 
     return hist16bin
 
@@ -358,9 +369,9 @@ def img_only_search(f):
 
     ## Now, we calculate the edge and intensity histograms of this image...
 
-    norm_hist = calculate_hist(tmp_img, 'n')
+    norm_hist = calculate_hist(tmp_img, 'n', False)
     gradient(tmp_img, tmp_img_edge)
-    edge_hist = calculate_hist(tmp_img_edge, 'e')
+    edge_hist = calculate_hist(tmp_img_edge, 'e', False)
 
     #Now, we pass the information to the calling method so we can pass it 
     #to the template for display
