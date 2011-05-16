@@ -23,24 +23,38 @@ import json
 
 import sys
 
+from imgsearch.video import *
+
+
 #This needs to point to your repository static/image folder!
-#IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
-IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
+VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 #VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
-
 
 
 #class to hold the result to display
 
 class QueryResult:
+    
     def __init__(self):
+        self.id = 0
         self.filename = ''
+        self.histogram = None
         self.percent = 0.0
         self.rank = 0.0
-
+    
+    def __cmp__(self, other):
+        if self.precent < other.percent:
+            return -1
+        elif self.precent == other.percent:
+            return 0
+        else:
+            return 1
 
 def img_rank(histograms):
     
@@ -58,9 +72,9 @@ def img_rank(histograms):
 
 
     """
-    Each bin represents a different picture in the database.  What I'm doing
+    Each histogram represents a different picture in the database.  What I'm doing
     here is simply comparing the current pictures histogram (bin by bin) with 
-    all of the picutures histograms which are stored in the database.  This first
+    all of the pictures histograms which are stored in the database.  This first
     case is only for the normal images.  The next case is for the edge map.
     """
     j = 0
@@ -74,16 +88,23 @@ def img_rank(histograms):
             m = max((norm['bin' + str(i)], cur_norm[i]))
             if m != 0:
                 res.percent += abs( 100.0 * (norm_diff[i]/ float(m)) )
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (norm_diff[i]/ float(m)) ))
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (norm_diff[i]/ float(m)) ))
             else:
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                pass
 
             i += 1
             if i >= 16:
                 break
+        res.id = int(norm['id'])
+        print 
+        print "ID: ",
+        print res.id
+        res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
         res.percent = res.percent/16.0
-        result.append(res)
-        print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
+        if res.percent != 100.0:
+            result.append(res)
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
         j += 1
 
     print "\n Edge Map: "
@@ -98,24 +119,35 @@ def img_rank(histograms):
             m = max((edge['bin' + str(i)], cur_edge[i]))
             if m != 0:
                 res.percent += abs( 100.0 * (edge_diff[i]/ float(m)) )
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (edge_diff[i]/ float(m)) ))
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (edge_diff[i]/ float(m)) ))
             else:
-                print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)      
+                pass
 
             i += 1
             if i >= 16:
                 break
+        
+        res.id = int(edge['id'])
+        print 
+        print "ID: ",
+        print res.id
+        res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
         res.percent = res.percent/16.0
-        result1.append(res)
-        print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
+        if res.percent != 100.0:
+            result1.append(res)
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
         j += 1
             
     
-    return 
+    # return both results
+    #print sorted(result)
+    return [result, result1]
 
 
 class UploadFile(forms.Form):
     name = models.ImageField()
+
     
 
 def handle_img_upload(f):
@@ -147,7 +179,7 @@ def handle_img_upload(f):
 
     # At this point, the file is in the images folder, and we can
     # do processing on it.
-    calculate_hist(path, 'n')
+    calculate_hist(path, 'n', True)
 
     # Next, we generate a edge map.  We can use various 
     # methods, but I went with the easiest for this, which is a basic gradient edge detection
@@ -156,13 +188,19 @@ def handle_img_upload(f):
 
     
     #Finally, we calculate the edge map histogram
-    calculate_hist(tmp_file, 'e')
+    calculate_hist(tmp_file, 'e', True)
     
 
     return
 
-def calculate_hist(path, t):
-    """ Returns a length 16 list """
+def calculate_hist(path, t, flag):
+    """ Returns a length 16 list
+        The third parameter is a flag.  It says that if it's set
+        to false, we should not put the calcuated histograms in the
+        database.  And we should if it's true.  This came about because
+        of the fact that search image histograms do not need to be put in the database
+        while uploaded images do.  And since I use the same function to calculate the
+        histograms there is no need to rewrite code, just set a flag."""
     try:
         image = Image.open(path)
     except IOError:
@@ -208,27 +246,27 @@ def calculate_hist(path, t):
     print "Size: ", len(hist16bin)
     print "Original Size: ", len(hist)
     
-    # Now we put the normal histogram in the database
-
-    normal = Histograms()
-    normal.bin0 = hist16bin[0]
-    normal.bin1 = hist16bin[1]
-    normal.bin2 = hist16bin[2]
-    normal.bin3 = hist16bin[3]
-    normal.bin4 = hist16bin[4]
-    normal.bin5 = hist16bin[5]
-    normal.bin6 = hist16bin[6]
-    normal.bin7 = hist16bin[7]
-    normal.bin8 = hist16bin[8]
-    normal.bin9 = hist16bin[9]
-    normal.bin10 = hist16bin[10]
-    normal.bin11 = hist16bin[11]
-    normal.bin12 = hist16bin[12]
-    normal.bin13 = hist16bin[13]
-    normal.bin14 = hist16bin[14]
-    normal.bin15 = hist16bin[15]
-    normal.hist_type = t
-    normal.save()
+    # Now we put the histogram in the database
+    if flag == True:
+        normal = Histograms()
+        normal.bin0 = hist16bin[0]
+        normal.bin1 = hist16bin[1]
+        normal.bin2 = hist16bin[2]
+        normal.bin3 = hist16bin[3]
+        normal.bin4 = hist16bin[4]
+        normal.bin5 = hist16bin[5]
+        normal.bin6 = hist16bin[6]
+        normal.bin7 = hist16bin[7]
+        normal.bin8 = hist16bin[8]
+        normal.bin9 = hist16bin[9]
+        normal.bin10 = hist16bin[10]
+        normal.bin11 = hist16bin[11]
+        normal.bin12 = hist16bin[12]
+        normal.bin13 = hist16bin[13]
+        normal.bin14 = hist16bin[14]
+        normal.bin15 = hist16bin[15]
+        normal.hist_type = t
+        normal.save()
 
     return hist16bin
 
@@ -263,17 +301,22 @@ def gradient(filename, new_filename):
     # Create a drawable object
     draw = ImageDraw.Draw(edge_map)
 
-
+    pix = image.load()
     for x in range(1, image.size[0] - 1):
         for y in range(1, image.size[1] - 1):
             IxVal = 0
             IyVal = 0
             for i in range(3):
                 for j in range(3):
-                    IxVal += Ix[i][j]*image.getpixel((x + i - 1, y + j - 1))
-                    IyVal += Iy[i][j]*image.getpixel((x + i - 1, y + j - 1))
+                    #IxVal += Ix[i][j]*image.getpixel((x + i - 1, y + j - 1))
+                    #IyVal += Iy[i][j]*image.getpixel((x + i - 1, y + j - 1))
+
+                    # This modification should prove to be very fast compared to the above
                     
-                        
+                    IxVal += Ix[i][j]*pix[x + i - 1, y + j - 1]
+                    IyVal += Iy[i][j]*pix[x + i - 1, y + j - 1]
+
+  
             #res = math.sqrt((IxVal**2) + (IyVal**2))        
             res = abs(IxVal) + abs(IyVal)
 
@@ -323,9 +366,9 @@ def img_only_search(f):
 
     ## Now, we calculate the edge and intensity histograms of this image...
 
-    norm_hist = calculate_hist(tmp_img, 'n')
+    norm_hist = calculate_hist(tmp_img, 'n', False)
     gradient(tmp_img, tmp_img_edge)
-    edge_hist = calculate_hist(tmp_img_edge, 'e')
+    edge_hist = calculate_hist(tmp_img_edge, 'e', False)
 
     #Now, we pass the information to the calling method so we can pass it 
     #to the template for display
@@ -381,10 +424,31 @@ def results(request):
 
             histograms = img_only_search(request.FILES['img_file'])
 
-            results = img_rank(histograms)
-            
 
-            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':results})
+            """ At this point, the two elements in the results list 
+                correspond to the same image information, but for two
+                histograms, namely normal and edge map histograms.  I
+                interleave the results.
+            """         
+            results = img_rank(histograms)
+            res = []
+            for i in range(len(results[0])):
+            
+                results[0][i].percent = 100.0 - results[0][i].percent;
+                res.append(results[0][i])
+                    
+                """
+                if i & 1 == 0:
+                    results[0][i].percent = 100.0 - results[0][i].percent;
+                    res.append(results[0][i])
+                    
+                else:
+                    results[1][i].percent = 100.0 - results[1][i].percent;
+                    res.append(results[1][i])
+                """
+            
+            
+            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
             
             #return render_to_response("results/index.html", context_instance=RequestContext(request))
             pass
@@ -401,7 +465,7 @@ def results(request):
         try:
             form = UploadFile(request.POST, request.FILES['img_file'])
             if form.is_valid():
-                print "FUCK YEAH"
+                
                 #handle_img_search(request.FILES['img_file'])
                 return render_to_response("results/index.html", context_instance=RequestContext(request))
             else:
@@ -430,50 +494,72 @@ def upload_file(request):
 
     try:
     	if request.method == 'POST':
+            form = None
             
-            form = UploadFile(request.POST, request.FILES['img'])
-            
-            if form.is_valid():
+            try:
+                res = request.FILES['img']
                 
-                #We test to see if the given image is of L band (true Grayscale)
-                test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
-                if test_grayscale.mode != 'L':
-                    return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
-                handle_img_upload(request.FILES['img'])
-
-                # We know that the normal histogram is inserted into the database
-                # first, and the edge second, so we can do this hack:
-                edge_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 1]['id']
-                norm_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 2:len(Histograms.objects.all()) - 1].get()['id']
+                """
+                This part handles the image upload
+                """
+                form = UploadFile(request.POST, request.FILES['img'])
+                if form.is_valid():
                 
-                # Here, we insert the Images information, now that we have the two IDs above.
+                    #We test to see if the given image is of L band (true Grayscale)
+                    test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
+                    if test_grayscale.mode != 'L':
+                        return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
+                    handle_img_upload(request.FILES['img'])
 
-                img = Images()
+                    # We know that the normal histogram is inserted into the database
+                    # first, and the edge second, so we can do this hack:
+                    edge_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 1]['id']
+                    norm_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 2:len(Histograms.objects.all()) - 1].get()['id']
+                
+                    # Here, we insert the Images information, now that we have the two IDs above.
+
+                    img = Images()
                
-                print str(request.FILES['img'].name)
-                print int(norm_id)
-                print int(edge_id)
-                print str(request.POST['title'])
-                print str(request.POST['textarea'])
+                    print str(request.FILES['img'].name)
+                    print int(norm_id)
+                    print int(edge_id)
+                    print str(request.POST['title'])
+                    print str(request.POST['textarea'])
                 
-                img.filename = str(request.FILES['img'].name)
-                img.orig_hist = int(norm_id)
-                img.edge_hist = int(edge_id)
-                img.title = str(request.POST['title'])
-                img.description = str(request.POST['textarea'])
-                img.save()
-                index_img_kw(img, img.title, img.description)
+                    img.filename = str(request.FILES['img'].name)
+                    img.orig_hist = int(norm_id)
+                    img.edge_hist = int(edge_id)
+                    img.title = str(request.POST['title'])
+                    img.description = str(request.POST['textarea'])
+                    img.save()
+                    index_img_kw(img, img.title, img.description)
 
-                return HttpResponseRedirect('/upload/complete')
-            else:
-                return HttpResponse("Invalid form input...")
+                    return HttpResponseRedirect('/upload/complete')
+                else:
+                    return HttpResponse("Invalid form input...")    
+            except:
+               
+                try:
+                    """
+                    Here we upload the zipped file, and process 3 frames from 5
+                    """
+                    res = request.FILES['vid']
+                    
+                    histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
+                    
+                    sequence = get_sequence(histograms)
+                    return HttpResponseRedirect('/upload/complete')
+                    
+                except:
+                    HttpResponse("Error uploading Video!")
+            
         else:
             
             form = UploadFile()
     except:
         return HttpResponse("Error During Upload")
         
-    return render_to_response("upload/index.html", { 'form':form} )
+    return render_to_response("upload/index.html", { 'form':form}, context_instance=RequestContext(request) )
    
 
 STOP_WORDS = ['I', 'a', 'about', 'an', 'are', 'as', 'at', 'be', 'by', 'com', 
