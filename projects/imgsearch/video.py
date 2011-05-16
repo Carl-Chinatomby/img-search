@@ -27,7 +27,7 @@ def calculate_hist(f):
    
     try:
         
-        image = Image.open(StringIO.StringIO(f))
+        image = Image.open(f)
     except IOError:
         log.debug("IO Error in calculate_hist!")
         exit(0)
@@ -60,7 +60,7 @@ def calculate_hist(f):
 
     return hist16bin
     
-    return None
+    return ''
 
 def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     """ 
@@ -86,13 +86,9 @@ def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     hists = {}
     
     for i in range(len(os.listdir(OUT_PATH + '/clip1'))):
-        print OUT_PATH + '/clip1/frame' + str(i) + '.jpg'
-        fi = open(OUT_PATH + '/clip1/frame' + str(i) + '.jpg')
-        hists[i] = calculate_hists(fi.read())
-        fi.close()
-        break
-   
-
+        filen = OUT_PATH + '/clip1/frame' + str(i) + '.jpg'
+        hists[i] = calculate_hist(filen)
+        
     print hists
 
     # First, we get the files from the archive, there is a specific format
