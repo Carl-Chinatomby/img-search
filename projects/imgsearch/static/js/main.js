@@ -39,7 +39,8 @@ $(document).ready(function(){
 
     $("#format").click(function(){
         alert("Zipped folder must contain clip folders enumerated starting from 0,"+
-              "such as: clip0, clip1, clip2, etc");
+              "such as: clip0, clip1, clip2, etc.  \n\nSimilarly, frames inside clip folders " +
+              "must be named: frame0, frame1, frame2, etc" );
     });
 
     $("#sub").click(function(){

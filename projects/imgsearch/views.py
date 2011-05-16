@@ -555,9 +555,11 @@ def upload_file(request):
             except:
                
                 try:
-                    
+                    """
+                    Here we upload the zipped file, and process 3 frames from 5
+                    """
                     res = request.FILES['vid']
-                    histograms = get_consecutive_hist(res)
+                    histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
                     
                     return HttpResponseRedirect('/upload/complete')
                     
