@@ -547,7 +547,7 @@ def upload_file(request):
                     
                     histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
                     
-                    #sequence = get_sequence(histograms)
+                    sequence = get_sequence(histograms)
                     return HttpResponseRedirect('/upload/complete')
                     
                 except:

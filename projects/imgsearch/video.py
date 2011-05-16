@@ -108,30 +108,35 @@ def get_sequence(histograms):
 
     # I'm normalizing (0 to 100) as well as calculating the difference below
     
-    flat0 = [histograms[0], histograms[1]]  
-    flat0 = [item for sublist in flat0 for item in sublist] # This flattens the list of lists
-    diff0 = (abs(sum(histograms[0], 0.0) / len(histograms[0]) - sum(histograms[1], 0.0) / len(histograms[1])) / max(flat0)) * 100.0
-    flat0 = [histograms[1], histograms[2]]  
-    flat0 = [item for sublist in flat0 for item in sublist] 
-    diff1 = (abs(sum(histograms[1], 0.0) / len(histograms[1]) - sum(histograms[2], 0.0) / len(histograms[2])) / max(flat0)) * 100.0
-    flat0 = [histograms[2], histograms[3]]  
-    flat0 = [item for sublist in flat0 for item in sublist]
-    diff2 = (abs(sum(histograms[2], 0.0) / len(histograms[2]) - sum(histograms[3], 0.0) / len(histograms[3])) / max(flat0)) * 100.0
-    flat0 = [histograms[3], histograms[4]]  
-    flat0 = [item for sublist in flat0 for item in sublist] 
-    diff3 = (abs(sum(histograms[3], 0.0) / len(histograms[3]) - sum(histograms[4], 0.0) / len(histograms[4])) / max(flat0)) * 100.0
+    diffs = []
+    for i in range(len(histograms) - 1):
+        flat0 = [histograms[i], histograms[i+1]]  
+        flat0 = [item for sublist in flat0 for item in sublist] # This flattens the list of lists
+        diffs.append((abs(sum(histograms[i], 0.0) / len(histograms[i]) - sum(histograms[i+1], 0.0) / len(histograms[i+1])) / max(flat0)) * 100.0)
     
-    sequence = [[]]
-    diffs =  [diff0, diff1, diff2, diff3, diff4]
+
+    # Sequence Algorithm    
+    seq = [[]]
     for i in range(len(diffs)):
-        
+        if diffs[i] < threshold:
+            # This is a sequence    
+            l = len(seq) - 1
+            seq[l].append(i)
+            if i + 1 == len(diffs):
+                seq[l].append(i + 1)
+            elif diffs[i + 1] > threshold:
+                seq[l].append(i + 1)
+                
+        else:
+            seq.append([])
+            if i + 1 == len(diffs):
+                seq[len(seq) - 1].append(i + 1)
+            elif diffs[i + 1] > threshold:
+                seq[len(seq) - 1].append(i + 1)
         
         pass
 
-    print diff1
-    print diff2
-    print diff3
-    print
+    print seq
 
     
     
