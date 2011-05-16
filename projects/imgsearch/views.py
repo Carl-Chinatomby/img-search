@@ -74,7 +74,7 @@ def img_rank(histograms):
     """
     Each histogram represents a different picture in the database.  What I'm doing
     here is simply comparing the current pictures histogram (bin by bin) with 
-    all of the picutures histograms which are stored in the database.  This first
+    all of the pictures histograms which are stored in the database.  This first
     case is only for the normal images.  The next case is for the edge map.
     """
     j = 0
@@ -148,13 +148,6 @@ def img_rank(histograms):
 class UploadFile(forms.Form):
     name = models.ImageField()
 
-def mysorted(mylist):
-
-   
-    
-    
-
-    return l
     
 
 def handle_img_upload(f):
@@ -454,15 +447,7 @@ def results(request):
                     res.append(results[1][i])
                 """
             
-            """
-            # fill in some details, life filename etc.
-            for i in results[0]:
-                i.filename = Images.objects.filter(id=i.id).values()[0]['filename']
-
-            for i in results[1]:
-                i.filename = Images.objects.filter(id=i.id).values()[0]['filename']
             
-            """
             return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
             
             #return render_to_response("results/index.html", context_instance=RequestContext(request))
@@ -480,7 +465,7 @@ def results(request):
         try:
             form = UploadFile(request.POST, request.FILES['img_file'])
             if form.is_valid():
-                print "FUCK YEAH"
+                
                 #handle_img_search(request.FILES['img_file'])
                 return render_to_response("results/index.html", context_instance=RequestContext(request))
             else:
@@ -559,8 +544,10 @@ def upload_file(request):
                     Here we upload the zipped file, and process 3 frames from 5
                     """
                     res = request.FILES['vid']
+                    
                     histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
                     
+                    #sequence = get_sequence(histograms)
                     return HttpResponseRedirect('/upload/complete')
                     
                 except:
@@ -572,7 +559,7 @@ def upload_file(request):
     except:
         return HttpResponse("Error During Upload")
         
-    return render_to_response("upload/index.html", { 'form':form} )
+    return render_to_response("upload/index.html", { 'form':form}, context_instance=RequestContext(request) )
    
 
 STOP_WORDS = ['I', 'a', 'about', 'an', 'are', 'as', 'at', 'be', 'by', 'com', 
