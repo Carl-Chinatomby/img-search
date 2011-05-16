@@ -119,7 +119,7 @@ def get_sequence(histograms):
     seq = [[]]
     for i in range(len(diffs)):
         if diffs[i] < threshold:
-            # This is a sequence    
+            # This is a sequence        
             l = len(seq) - 1
             seq[l].append(i)
             if i + 1 == len(diffs):

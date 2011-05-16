@@ -20,6 +20,7 @@ $(document).ready(function(){
         }
     });
 
+    /*
     $("#left_vid").click(function(){
         if( $("#left_vid").is(":checked") ){
             $("#video").show("slow");
@@ -35,7 +36,7 @@ $(document).ready(function(){
         else {
             $("#video").show("slow");
         }
-    });
+    }); */
 
     $("#format").click(function(){
         alert("Zipped folder must contain clip folders enumerated starting from 0,"+
