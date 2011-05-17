@@ -115,7 +115,7 @@
        
             {% for j in results %}
              <li class='res'>
-                <a href='#'>{{ j.filename }}</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                <a href={{ j.filename }} >{{ j.title }}</a> - <a href="#"> View Histogram </a> - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
                 <hr />
             </li>
             {% endfor %}

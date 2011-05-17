@@ -105,6 +105,8 @@ def img_rank(histograms):
         print res.id
         res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
         res.percent = res.percent/16.0
+        res.title = Images.objects.all().values().get(orig_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(orig_hist=res.id)['description']
         if res.percent != 100.0:
             result.append(res)
         #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
@@ -136,6 +138,8 @@ def img_rank(histograms):
         print "ID: ",
         print res.id
         res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
+        res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
         res.percent = res.percent/16.0
         if res.percent != 100.0:
             result1.append(res)
@@ -641,7 +645,7 @@ def text_only_search(text):
                 #### Advanced search features for later
                 #cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)+%d"}, select_params=[res, diff]).filter(keyword__contains=word)order_by('diff','-frequency')
                 ####
-                cur_res = Keywords.objects.extra(select={'diff':"%s"}, select_params=[ed_diff]).filter(keyword__exact=word).order_by('-frequency')
+                cur_res = Keywords.objects.extra(select={'diff':"%s"}, select_params=[ed_diff]).filter(keyword__exact=res).order_by('diff','-frequency')
                 results = list(chain(results, cur_res))
                 print cur_res
             #for res in cur_res:
@@ -650,11 +654,9 @@ def text_only_search(text):
 
     print results
     #now we need to rank the results for images based on most exact matches
-    ranked_res, _, _, _ = rank_results(results)
-    
-    final_res = txt_queryres_from_imgid(rankedres, 
+    ranked_res = rank_results(results)
 
-    return final_res
+    return ranked_res
     
 def rank_results(results):
     """
@@ -698,7 +700,9 @@ def rank_results(results):
     print ranked_diff
     ranked_res = [ x[0] for x in ranked_diff ] 
     print ranked_res
-    return ranked_res, points
+    final_res = txt_queryres_from_imgid(ranked_res, points)
+    print final_res
+    return final_res
 
 def txt_queryres_from_imgid(idlst, points):
     """
@@ -708,7 +712,7 @@ def txt_queryres_from_imgid(idlst, points):
     """
     cnt = 0
     results = []
-    total_pts = sum([i for i in x.values()])
+    total_pts = sum([i for i in points.values()])
     for imgid in idlst:
         cnt += 1
         cur_res = QueryResult()
