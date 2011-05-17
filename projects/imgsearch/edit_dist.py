@@ -56,9 +56,15 @@ class EditDistance():
         and the number of edits required for that result set (the diff)
         """
         #word is exact match so we dont need an edit distance on it
+        ####
+        #I comment this out becasue i'm using edit distance to calculate for exact matches
+        #When this project is over i'm going to re-include the substring matches and
+        #produce the edit distance afterword (just conforming to spec for now)
+        #if word in self.wordlist:
+        #    return []
+        ####
         if word in self.wordlist:
-            return []
-        
+            return [word], 0 #no typo found, word is in our dictionary
         curedit = self.edit(word)
         editcnt = 1
         results = []

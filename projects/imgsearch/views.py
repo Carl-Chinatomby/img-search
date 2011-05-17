@@ -22,6 +22,7 @@ from edit_dist import EditDistance
 import json
 
 import sys
+import string
 
 from imgsearch.video import *
 
@@ -581,8 +582,9 @@ def index_img_kw(img, title, description):
     des_kws = description.split()
     #titles count as double weight
     for word in title_kws:
+        word = word.lower()
+        word = string.translate(word, None, string.punctuation)
         if word not in STOP_WORDS:
-            word = word.lower()
             frequencies[word] = frequencies[word] + 2 if word in frequencies else 2
     print "title frequencies are"
     print frequencies
@@ -590,6 +592,7 @@ def index_img_kw(img, title, description):
     for word in des_kws:
         if word not in STOP_WORDS:
             word = word.lower()
+            word = string.translate(word, None, string.punctuation)
             frequencies[word] = frequencies[word] + 1 if word in frequencies else 1
     
     print "frequencies after the descriptions are"
@@ -620,26 +623,31 @@ def text_only_search(text):
     results = []
     ed = EditDistance(Keywords, 'keyword')
 
-    #exact and substring keyword matches incase-sensitive
     for word in search_words:
         if word not in STOP_WORDS:
-           cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)"}, select_params=[word]).filter(keyword__contains=word).order_by('diff','-frequency')
-           results = list(chain(results, cur_res))
-           print cur_res
-           ed.correct(word)
-           #for res in cur_res:
-           #   for kw in res:
-           #    print "Keyword %s has frequency %d and diff %d" % (res.keyword, res.frequency, res.diff)
+            #exact and substring keyword matches incase-sensitive
+            #####
+            #cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)"}, select_params=[word]).filter(keyword__contains=word).order_by('diff','-frequency')
+            #results = list(chain(results, cur_res))
+            #print cur_res
+            ####
+            ed_list, ed_diff = ed.correct(word)
+            for res in ed_list:
+                #### Advanced search features for later
+                #cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)+%d"}, select_params=[res, diff]).filter(keyword__contains=word)order_by('diff','-frequency')
+                ####
+                cur_res = Keywords.objects.extra(select={'diff':"%s"}, select_params=[ed_diff]).filter(keyword__exact=word).order_by('-frequency')
+                results = list(chain(results, cur_res))
+                print cur_res
+            #for res in cur_res:
+            #   for kw in res:
+            #       print "Keyword %s has frequency %d and diff %d" % (res.keyword, res.frequency, res.diff)
 
     print results
     #now we need to rank the results for images based on most exact matches
     ranked_res = rank_results(results)
-    
-    #substring matches incase-sensitive
-    
-    #edit distance matches
-    
-    #return results
+
+    return ranked_res
     
 def rank_results(results):
     """
