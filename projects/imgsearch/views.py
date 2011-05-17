@@ -411,7 +411,10 @@ def results(request):
         
         if img == None and text != None:
             # text only search
-            text_only_search(text)
+            res = text_only_search(text)
+            
+            return render_to_response("results/index.html", {'query': text, 'results':res})
+            
 
         elif img != None and text == None:
             # img only search   
@@ -447,7 +450,7 @@ def results(request):
                     results[1][i].percent = 100.0 - results[1][i].percent;
                     res.append(results[1][i])
                 """
-            
+            print results
             
             return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
             
