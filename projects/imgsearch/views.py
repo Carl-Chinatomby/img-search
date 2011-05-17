@@ -422,7 +422,7 @@ def results(request):
             return render_to_response("results/index.html", {'query': text, 'results':res})
             
 
-        elif img != None and text == None:
+        elif img != None:
             # img only search   
            
             print  " img: ", request.FILES['img_file'].content_type
@@ -457,16 +457,14 @@ def results(request):
                     res.append(results[1][i])
                 """
             print results
-            
-            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
-            
-            #return render_to_response("results/index.html", context_instance=RequestContext(request))
-            pass
-
-        elif img != None and text != None:
-            # text AND img search        
-            pass
-
+            if text == None:
+                return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
+                #return render_to_response("results/index.html", context_instance=RequestContext(request))
+            else:
+                # text AND img search        
+                txt_res = text_only_search(text)
+                final_res = txt_hist_res_merge(txt_res, results)
+                return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
 
 
             
@@ -725,3 +723,15 @@ def txt_queryres_from_imgid(idlst, points):
         cur_res.percent = points[cur_image.id] / float(total_pts) * 100
         results.append(cur_res)
     return results
+
+def txt_hist_res_merg(txt_results, hist_results):
+    """
+    Finds the Intersection of results in both queries and recalculates the percentage where the
+    new percentage is 50% textres percent + 50% histres percent and reranked accordingly
+    """
+    for tres in txt_results:
+        for hres in hist_results:
+            pass
+        pass
+    
+    return hist_results
