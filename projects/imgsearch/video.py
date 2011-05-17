@@ -65,8 +65,9 @@ def calculate_hist(f):
 def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     """ 
     This function calculates the histograms inside
-    the uploaded video, and returns a list of histograms
-    (consecutively)
+    the uploaded video, and returns a list of lists
+    of histograms.  Each list of list represents 
+    and entire different clip.
     """
     
     print "Image: ", IMAGE_DIR
@@ -84,10 +85,14 @@ def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     iz.close()
 
     hists = {}
-    
-    for i in range(len(os.listdir(OUT_PATH + '/clip1'))):
-        filen = OUT_PATH + '/clip1/frame' + str(i) + '.jpg'
-        hists[i] = calculate_hist(filen)
+
+    # Added for loop to handle case where there is more than 
+    # 1 clip.
+    for j in range(len(os.listdir(OUT_PATH))):
+        clip = '/clip' + str(j) + '/'
+        for i in range(len(os.listdir(OUT_PATH + clip))):
+            filen = OUT_PATH + clip + 'frame' + str(i) + '.jpg'
+            hists[i] = calculate_hist(filen)
         
     print hists
 

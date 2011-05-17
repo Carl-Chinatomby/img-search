@@ -28,13 +28,13 @@ from imgsearch.video import *
 
 
 #This needs to point to your repository static/image folder!
-#IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
-IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
 #IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
-#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
+VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 #VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
 
 
@@ -552,7 +552,7 @@ def upload_file(request):
                     Here we upload the zipped file, and process 3 frames from 5
                     """
                     res = request.FILES['vid']
-                    
+
                     histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
                     
                     sequence = get_sequence(histograms)
