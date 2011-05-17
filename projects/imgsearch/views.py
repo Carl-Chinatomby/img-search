@@ -554,8 +554,9 @@ def upload_file(request):
                     res = request.FILES['vid']
 
                     histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
-                    
+                    print "\nNumber of histograms: ", len(histograms)
                     sequence = get_sequence(histograms)
+
                     return HttpResponseRedirect('/upload/complete')
                     
                 except:
