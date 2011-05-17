@@ -48,6 +48,8 @@ class QueryResult:
         self.histogram = None
         self.percent = 0.0
         self.rank = 0.0
+        self.title = ''
+        self.description = ''
     
     def __cmp__(self, other):
         if self.precent < other.percent:
@@ -648,9 +650,11 @@ def text_only_search(text):
 
     print results
     #now we need to rank the results for images based on most exact matches
-    ranked_res = rank_results(results)
+    ranked_res, _, _, _ = rank_results(results)
+    
+    final_res = txt_queryres_from_imgid(rankedres, 
 
-    return ranked_res
+    return final_res
     
 def rank_results(results):
     """
@@ -694,4 +698,26 @@ def rank_results(results):
     print ranked_diff
     ranked_res = [ x[0] for x in ranked_diff ] 
     print ranked_res
-    return ranked_res
+    return ranked_res, points
+
+def txt_queryres_from_imgid(idlst, points):
+    """
+    idlst is a list of image id's ranked in descendingorder (the first element has the highest rank)
+    the Points dictionary is passed in to set the percentages
+    Returns a list of QueryResult objects 
+    """
+    cnt = 0
+    results = []
+    total_pts = sum([i for i in x.values()])
+    for imgid in idlst:
+        cnt += 1
+        cur_res = QueryResult()
+        cur_res.rank = cnt
+        cur_image = Images.objects.get(id=imgid)
+        cur_res.id = cur_image.id
+        cur_res.filename = cur_image.filename
+        cur_res.title = cur_image.title
+        cur_res.description = cur_image.description
+        cur_res.percent = points[cur_image.id] / float(total_pts) * 100
+        results.append(cur_res)
+    return results
