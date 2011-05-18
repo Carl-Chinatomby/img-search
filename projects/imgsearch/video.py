@@ -244,13 +244,17 @@ def seq_into_db(filename, seq, hist, title, desc):
     
     
     # Now, we get the list of clips
-    for i in seq.iteritems():
-        c = Clip()
-        frames = find_frames(i)
+    for k, v in seq.iteritems():
+        
+        c = Clips()
+        frames = find_frames(v)
 
-        c.start_filename = 'frame' + frames[0]
-        c.mid_filename = 'frame' + frames[1]
-        c.end_filename = 'frame' + frames[2]
+        
+        c.start_filename = 'frame' + str(frames[0])
+        c.mid_filename = 'frame' + str(frames[1])
+        c.end_filename = 'frame' + str(frames[2])
+
+        """
         # (path, t, flag):
         # Normal Hists
         norm1 = calculate_hist_and_id( '', 'n', True)
@@ -261,11 +265,13 @@ def seq_into_db(filename, seq, hist, title, desc):
         edge1 = calculate_hist_and_id( '', 'e', True)
         edge2 = calculate_hist_and_id( '', 'e', True)
         edge3 = calculate_hist_and_id( '', 'e', True)
-
+        """
         c.orig_hist_clips = None
         c.orig_hist_clips = None
+        
+        
 
-
+       
         # I need to get the last id, so I can add it to the
         # video tuple above...
 
@@ -278,6 +284,7 @@ def find_frames(seq):
     """
     takes a list of sequences and returns three frames.
     """
+    
     count = 0
     f = []
     l = len(seq)
@@ -298,3 +305,4 @@ def find_frames(seq):
             f.append(seq[i][len(seq[i])/2])
             count +=1
     return f
+    
