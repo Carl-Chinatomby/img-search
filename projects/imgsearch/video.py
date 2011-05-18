@@ -15,8 +15,89 @@ import logging as log
 
 from imgsearch.models import *
 
+#This needs to point to your repository static/image folder!
+IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
+
+#This needs to point to your repository static/videos folder!
+VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+
 
 # Here be dragons...
+
+def gradient(filename, new_filename):
+    """ This function generates a edge map on the given
+        filename image.  It outputs a grayscale image 
+        map."""
+
+    threshold = 255
+
+    Ix = ((-1, 0, -1),
+          (-1, 0, -1),
+          (-1, 0, -1)
+         )
+    Iy = ((-1, -1, -1),
+          (0 , 0 ,  0),
+          (-1, -1, -1)
+         )
+
+    try:
+        image = Image.open(filename)
+    except IOError:
+        print "Error opening image file!"
+        exit(-1)
+
+
+    # Generate a luminecanse image (Grayscale) of the same size and mode (L)
+    edge_map = Image.new(image.mode, image.size)
+    #image.show()
+
+
+    # Create a drawable object
+    draw = ImageDraw.Draw(edge_map)
+
+    pix = image.load()
+    for x in range(1, image.size[0] - 1):
+        for y in range(1, image.size[1] - 1):
+            IxVal = 0
+            IyVal = 0
+            for i in range(3):
+                for j in range(3):
+                    #IxVal += Ix[i][j]*image.getpixel((x + i - 1, y + j - 1))
+                    #IyVal += Iy[i][j]*image.getpixel((x + i - 1, y + j - 1))
+
+                    # This modification should prove to be very fast compared to the above
+                    
+                    IxVal += Ix[i][j]*pix[x + i - 1, y + j - 1]
+                    IyVal += Iy[i][j]*pix[x + i - 1, y + j - 1]
+
+  
+            #res = math.sqrt((IxVal**2) + (IyVal**2))        
+            res = abs(IxVal) + abs(IyVal)
+
+            if res > threshold:
+                draw.point((x, y), fill=255)
+            else:
+                draw.point((x, y), fill=0)
+
+    # Finished drawing
+    del draw
+
+    data = StringIO.StringIO()
+    edge_map.save(data, "JPEG")
+
+    #edge_map.show()
+
+    out = open(new_filename, "wb")
+
+    out.write(data.getvalue())
+    out.close()
+    
+
+    return
 
 def calculate_hist_and_id(path, t, flag):
     """
@@ -242,41 +323,75 @@ def seq_into_db(filename, seq, hist, title, desc):
     
     clips = []
     
-    
     # Now, we get the list of clips
     for k, v in seq.iteritems():
         
         c = Clips()
         frames = find_frames(v)
 
-        
         c.start_filename = 'frame' + str(frames[0])
         c.mid_filename = 'frame' + str(frames[1])
         c.end_filename = 'frame' + str(frames[2])
+        
+       
+        PATH1 = IMAGE_DIR + '/' + filename[:-4] + '/clip' + str(k) + '/frame' + str(frames[0]) + '.jpg'
+        PATH2 = IMAGE_DIR + '/' + filename[:-4] + '/clip' + str(k) + '/frame' + str(frames[1]) + '.jpg'
+        PATH3 = IMAGE_DIR + '/' + filename[:-4] + '/clip' + str(k) + '/frame' + str(frames[2]) + '.jpg'
 
-        """
+        TMP1 = IMAGE_DIR + '/tmp1.jpg'
+        TMP2 = IMAGE_DIR + '/tmp2.jpg'
+        TMP3 = IMAGE_DIR + '/tmp3.jpg'
+
+
+        # Generate edge map here for the 3 select frames
+
+        gradient(PATH1, TMP1)
+        gradient(PATH2, TMP2)
+        gradient(PATH3, TMP3)
+
+        
         # (path, t, flag):
         # Normal Hists
-        norm1 = calculate_hist_and_id( '', 'n', True)
-        norm2 = calculate_hist_and_id( '', 'n', True)
-        norm3 = calculate_hist_and_id( '', 'n', True)
+        norm1 = calculate_hist_and_id( PATH1, 'n', True)
+        norm2 = calculate_hist_and_id( PATH2, 'n', True)
+        norm3 = calculate_hist_and_id( PATH3, 'n', True)
 
         # Edge hists
-        edge1 = calculate_hist_and_id( '', 'e', True)
-        edge2 = calculate_hist_and_id( '', 'e', True)
-        edge3 = calculate_hist_and_id( '', 'e', True)
-        """
-        c.orig_hist_clips = None
-        c.orig_hist_clips = None
-        
-        
+        edge1 = calculate_hist_and_id( TMP1, 'e', True)
+        edge2 = calculate_hist_and_id( TMP2, 'e', True)
+        edge3 = calculate_hist_and_id( TMP3, 'e', True)
 
-       
+        # Save the CommanSeparatedIntegers representing the latest clip ids.
+        c.orig_hist_clips = str(norm1[0]) + "," + str(norm2[0]) + "," + str(norm3[0])
+        c.orig_hist_clips = str(edge1[0]) + "," + str(edge2[0]) + "," + str(edge3[0])
+        
+      
+        c.save()
         # I need to get the last id, so I can add it to the
         # video tuple above...
 
+        h = Clips.objects.all()
+        id = 0
+        l = len(h)
+
+        if len(h) > 0:
+            id = h[l - 1].id
+
     
+        clips.append(id)
+
     
+    for i in range(len(clips)):
+        clips[i] = str(clips[i])
+     
+    ",".join(clips)
+
+    video.clips = clips
+
+
+    video.save()
+
+
     return
 
     
