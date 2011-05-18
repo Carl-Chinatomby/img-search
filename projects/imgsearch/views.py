@@ -74,7 +74,7 @@ def sort_query_results(qrlst, attr=id):
     print qrlst
     ranked = [(getattr(qr, attr), qr) for qr in qrlst].sort() #returns a list of tuples sorted by id
     print ranked
-    return [ entry[1] for entry in ranked ] 
+    return [ entry[1] for entry in ranked ] if ranked else ranked
 #------
         
 
@@ -481,12 +481,12 @@ def results(request):
             else:
                 # text AND img search        
                 print "testing txt and img search"
-                print "the img results were"
-                print res
                 
                 txt_res = text_only_search(text)
                 print "the text results were"
                 print txt_res
+                print "the img results were"
+                print res
                 res = txt_hist_res_merge(txt_res, res)
                 print "the merged results are"
                 print res
@@ -753,6 +753,7 @@ def txt_queryres_from_imgid(idlst, points):
 
 def txt_hist_res_merge(txt_results, hist_results):
     """
+    Assumes both txt_results and hist_results is not empty
     Finds the Intersection of results in both queries and recalculates the percentage where the
     new percentage is 50% textres percent + 50% histres percent and reranked accordingly
     """
@@ -761,7 +762,12 @@ def txt_hist_res_merge(txt_results, hist_results):
     tres_weight = .50
     
     #Intersection Phase
-    hist_results = []
+    merged_results = []
+    print "about to do the intersction"
+    print "the txt_results before intesection is"
+    print txt_results
+    print "the hist res before intection is"
+    print hist_results
     for tres in txt_results:
         for hres in hist_results:
             cur_res = QueryResult()
@@ -774,16 +780,17 @@ def txt_hist_res_merge(txt_results, hist_results):
                 cur_res.filename = tres.id
                 cur_res.histogram = hres.histogram
                 cur_res.rank = 0
-                cur_res.percent = hres_weight * hres_percent + tres_weight * tres_percent
+                cur_res.percent = hres_weight * hres.percent + tres_weight * tres.percent
                 cur_res.title = tres.title
                 cur_res.description = tres.description
-                hist_results.append(cur_res)
+                merged_results.append(cur_res)
+                break
     print "the merged results are: "
-    print hist_results
+    print merged_results
     #Reranking Phase
-    hist_results = sort_query_results(hist_results, 'percent') if hist_results else []
+    merged_results = sort_query_results(merged_results, 'percent') if merged_results else []
     
-    return hist_results
+    return merged_results
 
 def vid_img_merg(vid_results, img_results):
     """
