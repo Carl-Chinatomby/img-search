@@ -30,13 +30,13 @@ from imgsearch.video import *
 
 
 #This needs to point to your repository static/image folder!
-#IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
-IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
 #IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
-#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
+VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 #VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
 
 
@@ -92,8 +92,11 @@ def img_rank(histograms):
     cur_norm = histograms[0]
     cur_edge = histograms[1]
 
-    all_norms = Histograms.objects.filter(hist_type='n').all().values()
-    all_edge  = Histograms.objects.filter(hist_type='e').all().values()
+    all_norms = Histograms.objects.filter(hist_type='n', is_video='x').all().values()
+    all_edge  = Histograms.objects.filter(hist_type='e', is_video='x').all().values()
+
+    all_norms_videos = Histograms.objects.filter(hist_type='n', is_video='y').all().values()
+    all_edge_videos  = Histograms.objects.filter(hist_type='e', is_video='y').all().values()
 
     """
     Each histogram represents a different picture in the database.  What I'm doing
@@ -101,6 +104,109 @@ def img_rank(histograms):
     all of the pictures histograms which are stored in the database.  This first
     case is only for the normal images.  The next case is for the edge map.
     """
+    j = 0
+    for norm in all_norms_videos:
+        i = 0
+
+        res = QueryResult()
+        for k, v in norm.iteritems():
+            
+            norm_diff[i] = abs(norm['bin' + str(i)] - cur_norm[i])
+            m = max((norm['bin' + str(i)], cur_norm[i]))
+            if m != 0:
+                res.percent += abs( 100.0 * (norm_diff[i]/ float(m)) )
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (norm_diff[i]/ float(m)) ))
+            else:
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                pass
+
+            i += 1
+            if i >= 16:
+                break
+        res.id = int(norm['id'])
+        print 
+        print "ID: ",
+        print res.id
+        """
+        res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
+        res.percent = res.percent/16.0
+        res.title = Images.objects.all().values().get(orig_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(orig_hist=res.id)['description']
+
+
+        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
+            res.type = "Video"
+            res.video = True
+            
+        """
+        if res.percent != 100.0:
+            result.append(res)
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
+        j += 1
+
+    print "\n Edge Map: "
+    j = 0
+    for edge in all_edge_videos:
+        i = 0
+
+        res = QueryResult()
+        for k, v in edge.iteritems():
+            
+            edge_diff[i] = abs(edge['bin' + str(i)] - cur_edge[i])
+            m = max((edge['bin' + str(i)], cur_edge[i]))
+            if m != 0:
+                res.percent += abs( 100.0 * (edge_diff[i]/ float(m)) )
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (edge_diff[i]/ float(m)) ))
+            else:
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)      
+                pass
+
+            i += 1
+            if i >= 16:
+                break
+        
+        res.id = int(edge['id'])
+        print 
+        print "ID: ",
+        print res.id
+
+        """
+        res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
+        res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
+        res.percent = res.percent/16.0
+
+        
+        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
+            res.type = "Video"
+            res.video = True
+            hist_type = Histograms.objects.all().values().get(id=res.id)['type']
+            #find the edge hist clip that contain that id in that array (dammit this made things harder)
+            curclip = Clips.objects.all().filter(Q(edge_hist_clips__startswith=res.id+',') | Q(edge_hist_clips__endswith=','+res.id) | Q(edge_hist_clips__contains=','+res.id+',') | Q(edge_hist_clips__exact=res.id))
+            clip_edge_hists = curclip.edge_hist_clips
+            #now we need to find out what frame match
+            clip_edge_lst = clip_edge_hists.split(',') 
+            if clip_edge_list[0] == res.id:
+                #set the framename, we may need the clip name attribute added so we can know what path to go to.
+                #test the above and then do the same process to find out what video the clip is associated with with that same type of query 
+                #then set the filename
+            elif clip_edge_list[1] == res.id:
+                pass
+            else:
+                pass
+            
+            #res.framename = 
+        """
+        if res.percent != 100.0:
+            result1.append(res)
+
+
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
+        j += 1
+
+
+
+    # IMAGE SEARCH -============================================================
     j = 0
     for norm in all_norms:
         i = 0
@@ -171,26 +277,6 @@ def img_rank(histograms):
         res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
         res.percent = res.percent/16.0
 
-
-        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
-            res.type = "Video"
-            res.video = True
-            hist_type = Histograms.objects.all().values().get(id=res.id)['type']
-            #find the edge hist clip that contain that id in that array (dammit this made things harder)
-            curclip = Clips.objects.all().filter(Q(edge_hist_clips__startswith=res.id+',') | Q(edge_hist_clips__endswith=','+res.id) | Q(edge_hist_clips__contains=','+res.id+',') | Q(edge_hist_clips__exact=res.id))
-            clip_edge_hists = curclip.edge_hist_clips
-            #now we need to find out what frame match
-            clip_edge_lst = clip_edge_hists.split(',') 
-            if clip_edge_list[0] == res.id:
-                #set the framename, we may need the clip name attribute added so we can know what path to go to.
-                #test the above and then do the same process to find out what video the clip is associated with with that same type of query 
-                #then set the filename
-            elif clip_edge_list[1] == res.id:
-                pass
-            else:
-                pass
-            
-            #res.framename = 
         if res.percent != 100.0:
             result1.append(res)
 
