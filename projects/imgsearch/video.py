@@ -19,7 +19,7 @@ from edit_dist import EditDistance
 
 import json
 
-import sys, os, zipfile
+import sys, os, zipfile, shutil
 
 import logging as log
 
@@ -83,6 +83,16 @@ def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     OUT_PATH = str(IMAGE_DIR) + '/' + f.name[:-4]
     
     iz.extractall(IMAGE_DIR)
+
+    # Save the actual zip file to the directory!
+    destination = open(IMAGE_DIR + '/' + f.name, 'wb+')
+    for chunk in f.chunks():
+        destination.write(chunk)
+    destination.close()
+
+
+    
+    ofile.close()
     iz.close()
 
    

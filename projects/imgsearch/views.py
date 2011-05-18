@@ -464,22 +464,6 @@ def results(request):
                 txt_res = text_only_search(text)
                 final_res = txt_hist_res_merge(txt_res, results)
                 return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
-
-
-            
-
-        """
-        try:
-            form = UploadFile(request.POST, request.FILES['img_file'])
-            if form.is_valid():
-                
-                #handle_img_search(request.FILES['img_file'])
-                return render_to_response("results/index.html", context_instance=RequestContext(request))
-            else:
-                return HttpResponse("Invalid form input...")
-        except:
-            return HttpResponse("Error using image in search...")
-        """
     
                     
 
