@@ -352,12 +352,6 @@ def gradient(filename, new_filename):
     
 
 def img_only_search(f):
-   
-    tmp = Image.open(f)
-
-    if tmp.mode != 'L':
-        
-        raise Http404
 
 
     tmp_img = IMAGE_DIR + '/cur_pic.jpg'
@@ -438,6 +432,12 @@ def results(request):
                 return HttpResponse("Must be JPEG!")
 
             form = UploadFile(request.POST, request.FILES['img_file'])
+
+            
+            # Test to see that the uploaded image is 'L' band
+            test_grayscale = Image.open(StringIO.StringIO(request.FILES['img_file'].read()))
+            if test_grayscale.mode != 'L':
+                return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
 
             histograms = img_only_search(request.FILES['img_file'])
 
