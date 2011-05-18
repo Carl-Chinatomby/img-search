@@ -13,7 +13,68 @@ import json
 import sys, os, zipfile, shutil
 import logging as log
 
+from imgsearch.models import *
+
+
 # Here be dragons...
+
+def calculate_hist(path, t, flag):
+
+    try:
+        image = Image.open(path)
+    except IOError:
+        print "Error Opening Image file (PIL)"
+
+    try:
+        hist = image.histogram()
+    except:
+        print "Unexpected error:", sys.exc_info()
+        exit(0)
+        
+    hist16bin = []
+
+    start = 0
+    end = 16
+
+    bin_count = 0
+    hist16bin.append(0)
+
+    for i in range(len(hist)):
+        if i % 16 == 0:
+            
+            start = i
+            end = start + 16
+            if bin_count == 15:
+                break
+            bin_count += 1
+            hist16bin.append(0)
+            
+        else:
+            hist16bin[bin_count] += hist[i]
+    
+    # Now we put the histogram in the database
+    if flag == True:
+        normal = Histograms()
+        normal.bin0 = hist16bin[0]
+        normal.bin1 = hist16bin[1]
+        normal.bin2 = hist16bin[2]
+        normal.bin3 = hist16bin[3]
+        normal.bin4 = hist16bin[4]
+        normal.bin5 = hist16bin[5]
+        normal.bin6 = hist16bin[6]
+        normal.bin7 = hist16bin[7]
+        normal.bin8 = hist16bin[8]
+        normal.bin9 = hist16bin[9]
+        normal.bin10 = hist16bin[10]
+        normal.bin11 = hist16bin[11]
+        normal.bin12 = hist16bin[12]
+        normal.bin13 = hist16bin[13]
+        normal.bin14 = hist16bin[14]
+        normal.bin15 = hist16bin[15]
+        normal.hist_type = t
+        normal.save()
+
+    return hist16bin
 
 def calculate_hist(f):
    
@@ -164,6 +225,32 @@ def seq_into_db(filename, seq, hist, title, desc):
     hist [{0:[122, 123, 2, 3, ...]}, { 1:[23,422,445]...} ... ]
     """
 
+    video = Videos()
+    
+    video.filename = filename
+    video.title = title
+    video.description = desc
+    
+    clips = []
+    
+    """
+    # Now, we get the list of clips
+    for i in seq.iteritems():
+        c = Clip()
+        frames = find_frames(i)
+        c.start_filename = 'frame' + frames[0]
+        c.mid_filename = 'frame' + frames[1]
+        c.end_filename = 'frame' + frames[2]
+
+        
+        c.orig_hist_clips = None
+        c.orig_hist_clips = None
+
+
+        # I need to get the last id, so I can add it to the
+        # video tuple above...
+
+    """
     
     return
 
