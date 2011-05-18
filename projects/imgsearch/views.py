@@ -70,12 +70,7 @@ def sort_query_results(qrlst, attr=id):
     Query Result Toolkit Function
     Sorts a list of Query Result Objects by the attribute given
     """
-    
-    
-    print "origoinal list is"
-    print qrlst
-    ranked = [(getattr(qr, attr), qr) for qr in qrlst].sort() #returns a list of tuples sorted by id
-    print ranked
+    ranked = [(getattr(qr, attr), qr) for qr in qrlst].sort() #returns a list of tuples sorted by attr
     return [ entry[1] for entry in ranked ] if ranked else qrlst
 #------
         
@@ -749,22 +744,12 @@ def txt_hist_res_merge(txt_results, hist_results):
     
     #Intersection Phase
     merged_results = []
-    print "about to do the intersction"
-    print "the txt_results before intesection is"
-    print txt_results
-    print "the hist res before intection is"
-    print hist_results
     for tres in txt_results:
         for hres in hist_results:
             cur_res = QueryResult()
-            print "the text id is" 
-            print tres.id
-            print "the hres id is"
-            print hres.id
             if tres.id == hres.id: #intersection in both sets
-                print "Found a MATCH!!!!"
                 cur_res.id = tres.id
-                cur_res.filename = tres.id
+                cur_res.filename = tres.filename
                 cur_res.histogram = hres.histogram
                 cur_res.rank = 0
                 cur_res.percent = hres_weight * hres.percent + tres_weight * tres.percent
@@ -772,8 +757,7 @@ def txt_hist_res_merge(txt_results, hist_results):
                 cur_res.description = tres.description
                 merged_results.append(cur_res)
                 break
-    print "the merged results are: "
-    print merged_results
+
     #Reranking Phase
     merged_results = sort_query_results(merged_results, 'percent') if merged_results else []
     
@@ -781,7 +765,10 @@ def txt_hist_res_merge(txt_results, hist_results):
 
 def vid_img_merg(vid_results, img_results):
     """
-    merged the ranked video and img results based on histogram means and standard deviations
-    and reranks them accordingly
+    merged the ranked video and img results and reranks based on percentage
     """
-    pass
+    merged_results = []
+    merged_results.extend(vid_results)
+    merged_results.extend(img_results)
+    sort_query_results(merged_results, 'percent')
+    return merged_results
