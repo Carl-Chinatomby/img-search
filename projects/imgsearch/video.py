@@ -155,6 +155,7 @@ def calculate_hist_and_id(path, t, flag):
         normal.bin14 = hist16bin[14]
         normal.bin15 = hist16bin[15]
         normal.hist_type = t
+        normal.is_video = 'y'
         normal.save()
 
     im = Histograms.objects.all()

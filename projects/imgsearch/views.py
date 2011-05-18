@@ -56,6 +56,7 @@ class QueryResult:
         #Video Fields
         self.video = False
         self.framename = None
+        self.type = ''
     
     def __cmp__(self, other):
         if self.precent < other.percent:
@@ -72,8 +73,13 @@ def sort_query_results(qrlst, attr=id):
     """
     ranked = [(getattr(qr, attr), qr) for qr in qrlst].sort() #returns a list of tuples sorted by attr
     return [ entry[1] for entry in ranked ] if ranked else qrlst
-#------
-        
+
+
+def video_rank(histograms):
+
+
+    return
+
 
 def img_rank(histograms):
     
@@ -88,7 +94,6 @@ def img_rank(histograms):
 
     all_norms = Histograms.objects.filter(hist_type='n').all().values()
     all_edge  = Histograms.objects.filter(hist_type='e').all().values()
-
 
     """
     Each histogram represents a different picture in the database.  What I'm doing
@@ -123,6 +128,12 @@ def img_rank(histograms):
         res.percent = res.percent/16.0
         res.title = Images.objects.all().values().get(orig_hist=res.id)['title']
         res.description = Images.objects.all().values().get(orig_hist=res.id)['description']
+
+
+        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
+            res.type = "Video"
+            res.video = True
+
         if res.percent != 100.0:
             result.append(res)
         #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
@@ -153,12 +164,20 @@ def img_rank(histograms):
         print 
         print "ID: ",
         print res.id
+
         res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
         res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
         res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
         res.percent = res.percent/16.0
+
+
+        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
+            res.type = "Video"
+            res.video = True
         if res.percent != 100.0:
             result1.append(res)
+
+
         #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
         j += 1
             
@@ -461,6 +480,7 @@ def results(request):
                 interleave the results.
             """         
             results = img_rank(histograms)
+
             res = []
             for i in range(len(results[0])):
             

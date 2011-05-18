@@ -115,7 +115,7 @@
             {% for j in results %}
              <li class='res'>
                 <img src="{{ STATIC_PREFIX }}images/{{ j.filename }}" width='50' height='50' alt='No Pic' />
-                <a href="{{ j.filename }}" >{{ j.title }}</a> - <a href="#"> View Histogram </a> - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                <a href="{{ j.filename }}" >{{ j.title }}</a> - FileType: {{ j.type }} - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
                 
                 <hr/>
             </li>

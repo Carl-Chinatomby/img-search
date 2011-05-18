@@ -5,6 +5,7 @@ from django.db import models
 class Histograms(models.Model):
     id = models.AutoField(primary_key=True)
     hist_type = models.CharField(max_length=1)
+    is_video = models.CharField(max_length=1)
     bin0 = models.IntegerField()
     bin1 = models.IntegerField()
     bin2 = models.IntegerField()
