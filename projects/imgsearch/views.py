@@ -39,7 +39,6 @@ VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 
 
 #class to hold the result to display
-
 class QueryResult:
     """
     A Result class that represents an object to be passed to the templates on the results page
@@ -66,11 +65,18 @@ class QueryResult:
         
 def sort_query_results(qrlst, attr=id):
     """
+    Query Result Toolkit Function
     Sorts a list of Query Result Objects by the attribute given
     """
-    #sorted_attr = [(getattr(qrlst[i], attr), i, qrlst[i]), for i in xrange(len(qrlst))]
-    sorted_attr = [(getattr(qr, attr), qr), for qr in qrlst)].sort() #returns a list of tuples sorted by id
-    return [ entry[1] for entry in sorted_attr ] 
+    
+    
+    print "origoinal list is"
+    print qrlst
+    ranked = [(getattr(qr, attr), qr) for qr in qrlst].sort() #returns a list of tuples sorted by id
+    print ranked
+    return [ entry[1] for entry in ranked ] 
+#------
+        
 
 def img_rank(histograms):
     
@@ -474,8 +480,16 @@ def results(request):
                 #return render_to_response("results/index.html", context_instance=RequestContext(request))
             else:
                 # text AND img search        
+                print "testing txt and img search"
+                print "the img results were"
+                print res
+                
                 txt_res = text_only_search(text)
-                final_res = txt_hist_res_merge(txt_res, results)
+                print "the text results were"
+                print txt_res
+                res = txt_hist_res_merge(txt_res, res)
+                print "the merged results are"
+                print res
                 return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
 
 
@@ -751,7 +765,11 @@ def txt_hist_res_merge(txt_results, hist_results):
     for tres in txt_results:
         for hres in hist_results:
             cur_res = QueryResult()
-            if tres.id == hes.id: #intersection in both sets
+            print "the text id is" 
+            print tres.id
+            print "the hres id is"
+            print hres.id
+            if tres.id == hres.id: #intersection in both sets
                 cur_res.id = tres.id
                 cur_res.filename = tres.id
                 cur_res.histogram = hres.histogram
@@ -760,9 +778,10 @@ def txt_hist_res_merge(txt_results, hist_results):
                 cur_res.title = tres.title
                 cur_res.description = tres.description
                 hist_results.append(cur_res)
-    
+    print "the merged results are: "
+    print hist_results
     #Reranking Phase
-    hist_results = sort_query_results(hist_results)
+    hist_results = sort_query_results(hist_results, 'percent') if hist_results else []
     
     return hist_results
 
