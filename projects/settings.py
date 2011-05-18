@@ -10,11 +10,11 @@ ADMINS = (
 MANAGERS = ADMINS
 
 #Eudis
-#BASE = '/home/prototype/repos/git/img-search/projects'
+BASE = '/home/prototype/repos/git/img-search/projects'
 
 #Carl
 #BASE = '/home/carl/protected/git/img-search/projects'
-BASE = '/home/carl/git/img-search/projects'
+#BASE = '/home/carl/git/img-search/projects'
 
 #Server
 #BASE = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects'

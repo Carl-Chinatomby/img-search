@@ -18,8 +18,10 @@ from imgsearch.models import *
 
 # Here be dragons...
 
-def calculate_hist(path, t, flag):
-
+def calculate_hist_and_id(path, t, flag):
+    """
+    This is a modified trusty hist function
+    """
     try:
         image = Image.open(path)
     except IOError:
@@ -74,10 +76,17 @@ def calculate_hist(path, t, flag):
         normal.hist_type = t
         normal.save()
 
-    return hist16bin
+    im = Histograms.objects.all()
+    id = 0
+    l = len(im)
+
+    if len(im) > 0:
+        id = im[l - 1].id
+
+    return [id, hist16bin]
+
 
 def calculate_hist(f):
-   
     try:
         
         image = Image.open(f)
@@ -233,16 +242,26 @@ def seq_into_db(filename, seq, hist, title, desc):
     
     clips = []
     
-    """
+    
     # Now, we get the list of clips
     for i in seq.iteritems():
         c = Clip()
         frames = find_frames(i)
+
         c.start_filename = 'frame' + frames[0]
         c.mid_filename = 'frame' + frames[1]
         c.end_filename = 'frame' + frames[2]
+        # (path, t, flag):
+        # Normal Hists
+        norm1 = calculate_hist_and_id( '', 'n', True)
+        norm2 = calculate_hist_and_id( '', 'n', True)
+        norm3 = calculate_hist_and_id( '', 'n', True)
 
-        
+        # Edge hists
+        edge1 = calculate_hist_and_id( '', 'e', True)
+        edge2 = calculate_hist_and_id( '', 'e', True)
+        edge3 = calculate_hist_and_id( '', 'e', True)
+
         c.orig_hist_clips = None
         c.orig_hist_clips = None
 
@@ -250,7 +269,7 @@ def seq_into_db(filename, seq, hist, title, desc):
         # I need to get the last id, so I can add it to the
         # video tuple above...
 
-    """
+    
     
     return
 
