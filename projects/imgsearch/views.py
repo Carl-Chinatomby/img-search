@@ -28,13 +28,13 @@ from imgsearch.video import *
 
 
 #This needs to point to your repository static/image folder!
-IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
-#IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
+IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
 #IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
-VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
-#VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
+#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
+VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 #VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
 
 
@@ -725,14 +725,38 @@ def txt_queryres_from_imgid(idlst, points):
         results.append(cur_res)
     return results
 
-def txt_hist_res_merg(txt_results, hist_results):
+def txt_hist_res_merge(txt_results, hist_results):
     """
     Finds the Intersection of results in both queries and recalculates the percentage where the
     new percentage is 50% textres percent + 50% histres percent and reranked accordingly
     """
+    #the weight should add up to 1
+    hres_weight = .50
+    tres_weight = .50
+    
+    #Intersection Phase
+    hist_results = []
     for tres in txt_results:
         for hres in hist_results:
-            pass
-        pass
+            cur_res = QueryResult()
+            if tres.id == hes.id: #intersection in both sets
+                cur_res.id = tres.id
+                cur_res.filename = tres.id
+                cur_res.histogram = hres.histogram
+                cur_res.rank = 0
+                cur_res.percent = hres_weight * hres_percent + tres_weight * tres_percent
+                cur_res.title = tres.title
+                cur_res.description = tres.description
+                hist_results.append(cur_res)
+    
+    #Reranking Phase
+    
     
     return hist_results
+
+def vid_img_merg(vid_results, img_results):
+    """
+    merged the ranked video and img results based on histogram means and standard deviations
+    and reranks them accordingly
+    """
+    pass
