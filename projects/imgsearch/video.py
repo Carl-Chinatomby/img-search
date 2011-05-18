@@ -364,7 +364,7 @@ def seq_into_db(filename, seq, hist, title, desc):
 
         # Save the CommanSeparatedIntegers representing the latest clip ids.
         c.orig_hist_clips = str(norm1[0]) + "," + str(norm2[0]) + "," + str(norm3[0])
-        c.orig_hist_clips = str(edge1[0]) + "," + str(edge2[0]) + "," + str(edge3[0])
+        c.edge_hist_clips = str(edge1[0]) + "," + str(edge2[0]) + "," + str(edge3[0])
         
       
         c.save()

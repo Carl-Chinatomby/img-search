@@ -124,20 +124,52 @@ def img_rank(histograms):
             if i >= 16:
                 break
         res.id = int(norm['id'])
+        """
         print 
         print "ID: ",
         print res.id
         """
-        res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
+        clips = Clips.objects.all().values()
+        for clip in clips:
+            c = clip['orig_hist_clips']
+
+            if str(res.id) in c.split(','):
+                
+                clip_id = clip['id']
+                videos = Videos.objects.all().values()
+                print "LEN: "
+                print len(videos)
+                for vid in videos:
+                    
+                    if str(clip_id) in vid['clips']:
+                        res.filename = vid['filename'] 
+                        print "\n\nVID: "
+                        print res.filename
+        """  
+        res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
+        res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
         res.percent = res.percent/16.0
-        res.title = Images.objects.all().values().get(orig_hist=res.id)['title']
-        res.description = Images.objects.all().values().get(orig_hist=res.id)['description']
 
-
-        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
-            res.type = "Video"
-            res.video = True
+        res.type = "Video"
+        res.video = True
+        hist_type = Histograms.objects.all().values().get(id=res.id)['type']
+        #find the edge hist clip that contain that id in that array (dammit this made things harder)
+        curclip = Clips.objects.all().filter(Q(edge_hist_clips__startswith=res.id+',') | Q(edge_hist_clips__endswith=','+res.id) | Q(edge_hist_clips__contains=','+res.id+',') | Q(edge_hist_clips__exact=res.id))
+        clip_edge_hists = curclip.edge_hist_clips
+        #now we need to find out what frame match
+        clip_edge_lst = clip_edge_hists.split(',') 
+        if clip_edge_list[0] == res.id:
+            pass
+            #set the framename, we may need the clip name attribute added so we can know what path to go to.
+            #test the above and then do the same process to find out what video the clip is associated with with that same type of query 
+            #then set the filename
+        elif clip_edge_list[1] == res.id:
+            pass
+        else:
+            pass
             
+        #res.framename = 
         """
         if res.percent != 100.0:
             result.append(res)
@@ -166,9 +198,11 @@ def img_rank(histograms):
                 break
         
         res.id = int(edge['id'])
+        """
         print 
         print "ID: ",
         print res.id
+        """
 
         """
         res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
@@ -227,9 +261,11 @@ def img_rank(histograms):
             if i >= 16:
                 break
         res.id = int(norm['id'])
+        """
         print 
         print "ID: ",
         print res.id
+        """
         res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
         res.percent = res.percent/16.0
         res.title = Images.objects.all().values().get(orig_hist=res.id)['title']
@@ -268,9 +304,11 @@ def img_rank(histograms):
                 break
         
         res.id = int(edge['id'])
+        """
         print 
         print "ID: ",
         print res.id
+        """
 
         res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
         res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
