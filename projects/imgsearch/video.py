@@ -65,8 +65,10 @@ def calculate_hist(f):
 def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     """ 
     This function calculates the histograms inside
-    the uploaded video, and returns a list of histograms
-    (consecutively)
+    the uploaded video, and returns a list of dictionaries
+    mapping a frame number (0, 1, 2..) to a histogram for
+    that frame.  Each list entry in the List represents
+    an entire clip.
     """
     
     print "Image: ", IMAGE_DIR
@@ -83,62 +85,76 @@ def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     iz.extractall(IMAGE_DIR)
     iz.close()
 
-    hists = {}
-    
-    for i in range(len(os.listdir(OUT_PATH + '/clip1'))):
-        filen = OUT_PATH + '/clip1/frame' + str(i) + '.jpg'
-        hists[i] = calculate_hist(filen)
+   
+
+    # Added for loop to handle case where there is more than 
+    # 1 clip.
+    List = []
+    for j in range(len(os.listdir(OUT_PATH))):
+        hists = {}
+        clip = '/clip' + str(j) + '/'
+        for i in range(len(os.listdir(OUT_PATH + clip))):
+            filen = OUT_PATH + clip + 'frame' + str(i) + '.jpg'
+            hists[i] = calculate_hist(filen)
         
-    print hists
+        List.append(hists)
+        
+    print List
 
     # First, we get the files from the archive, there is a specific format
     # which is root_folder/[clip#]/[frame#]
 
     # First, we change directory     
 
-    return hists
+    return List
 
 
 
-def get_sequence(histograms):
+def get_sequence(hists):
     """
-        returns three histograms
+        This is the generalized sequence algorithm.
+        It returns a mapping of clip numbers (dictionary)
+        to clip sequences, which are of the form: [[seq1], [seq2], etc]
+        so for clip 0, with 3 sequences, it would look like this:
+        { 0: [[1, 2], [3], [4, 5]], ...}
     """
     threshold = 10.0
 
     # I'm normalizing (0 to 100) as well as calculating the difference below
     
-    diffs = []
-    for i in range(len(histograms) - 1):
-        flat0 = [histograms[i], histograms[i+1]]  
-        flat0 = [item for sublist in flat0 for item in sublist] # This flattens the list of lists
-        diffs.append((abs(sum(histograms[i], 0.0) / len(histograms[i]) - sum(histograms[i+1], 0.0) / len(histograms[i+1])) / max(flat0)) * 100.0)
-    
+    # Sequence Algorithm  
+    clips_seqs = {}
+    clip_count = 0  
+    for histograms in hists:
+        diffs = []
+        seq = [[]]
 
-    # Sequence Algorithm    
-    seq = [[]]
-    for i in range(len(diffs)):
-        if diffs[i] < threshold:
-            # This is a sequence        
-            l = len(seq) - 1
-            seq[l].append(i)
-            if i + 1 == len(diffs):
-                seq[l].append(i + 1)
-            elif diffs[i + 1] > threshold:
-                seq[l].append(i + 1)
+        for i in range(len(histograms) - 1):
+            flat0 = [histograms[i], histograms[i+1]]  
+            flat0 = [item for sublist in flat0 for item in sublist] # This flattens the list of lists
+            diffs.append((abs(sum(histograms[i], 0.0) / len(histograms[i]) - sum(histograms[i+1], 0.0) / len(histograms[i+1])) / max(flat0)) * 100.0)
+
+        for i in range(len(diffs)):
+            if diffs[i] < threshold:
+                # This is a sequence        
+                l = len(seq) - 1
+                seq[l].append(i)
+                if i + 1 == len(diffs):
+                    seq[l].append(i + 1)
+                elif diffs[i + 1] > threshold:
+                    seq[l].append(i + 1)
                 
-        else:
-            seq.append([])
-            if i + 1 == len(diffs):
-                seq[len(seq) - 1].append(i + 1)
-            elif diffs[i + 1] > threshold:
-                seq[len(seq) - 1].append(i + 1)
+            else:
+                seq.append([])
+                if i + 1 == len(diffs):
+                    seq[len(seq) - 1].append(i + 1)
+                elif diffs[i + 1] > threshold:
+                    seq[len(seq) - 1].append(i + 1)
+
+        clips_seqs[clip_count] = seq
+        clip_count += 1
         
-        pass
 
-    print seq
+    print clips_seqs
 
-    
-    
-
-    return 
+    return clips_seqs
