@@ -11,6 +11,8 @@ from django.db import models
 
 from imgsearch.models import Histograms, Images, Keywords
 
+from django.http import Http404
+
 import StringIO
 from PIL import Image, ImageDraw
 
@@ -366,12 +368,11 @@ def gradient(filename, new_filename):
     
 
     return
-
-
+    
 
 def img_only_search(f):
-   
-    
+
+
     tmp_img = IMAGE_DIR + '/cur_pic.jpg'
     tmp_img_edge = IMAGE_DIR + '/cur_pic_edge.jpg'
 
@@ -450,6 +451,12 @@ def results(request):
 
             form = UploadFile(request.POST, request.FILES['img_file'])
 
+            
+            # Test to see that the uploaded image is 'L' band
+            test_grayscale = Image.open(StringIO.StringIO(request.FILES['img_file'].read()))
+            if test_grayscale.mode != 'L':
+                return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
+
             histograms = img_only_search(request.FILES['img_file'])
 
 
@@ -462,18 +469,10 @@ def results(request):
             res = []
             for i in range(len(results[0])):
             
-                results[0][i].percent = 100.0 - results[0][i].percent;
+                results[0][i].percent = ((100.0 - results[0][i].percent) + (100.0 - results[1][i].percent)) / 2.0;
                 res.append(results[0][i])
                     
-                """
-                if i & 1 == 0:
-                    results[0][i].percent = 100.0 - results[0][i].percent;
-                    res.append(results[0][i])
-                    
-                else:
-                    results[1][i].percent = 100.0 - results[1][i].percent;
-                    res.append(results[1][i])
-                """
+              
             print results
             if text == None:
                 return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
@@ -491,22 +490,6 @@ def results(request):
                 print "the merged results are"
                 print res
                 return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
-
-
-            
-
-        """
-        try:
-            form = UploadFile(request.POST, request.FILES['img_file'])
-            if form.is_valid():
-                
-                #handle_img_search(request.FILES['img_file'])
-                return render_to_response("results/index.html", context_instance=RequestContext(request))
-            else:
-                return HttpResponse("Invalid form input...")
-        except:
-            return HttpResponse("Error using image in search...")
-        """
     
                     
 
@@ -575,13 +558,16 @@ def upload_file(request):
                
                 try:
                     """
-                    Here we upload the zipped file, and process 3 frames from 5
+                    Here we upload the zipped file, and process n-clips with m-frames
                     """
                     res = request.FILES['vid']
 
                     histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
-                    print "\nNumber of histograms: ", len(histograms)
+                    
                     sequence = get_sequence(histograms)
+
+                    # This function saves 3 main frames from all the seqs given into the database
+                    seq_into_db(res.name, sequence, histograms, str(request.POST['title']), str(request.POST['textarea']))
 
                     return HttpResponseRedirect('/upload/complete')
                     

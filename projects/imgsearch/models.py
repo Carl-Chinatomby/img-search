@@ -49,8 +49,8 @@ class Videos(models.Model):
     id = models.AutoField(primary_key=True)
     filename = models.CharField(max_length=255)
     clips = models.CommaSeparatedIntegerField(max_length=10)
-    title = models.IntegerField()
-    description = models.IntegerField()
+    title = models.CharField(max_length=255)
+    description = models.TextField()
 
 class Keywords(models.Model):
     """
