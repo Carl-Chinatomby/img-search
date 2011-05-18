@@ -1,27 +1,19 @@
 from django.template import Context, RequestContext, loader
 from django.http import HttpResponse, HttpResponseRedirect
-
 from django.shortcuts import render_to_response
 from django import forms
 from django.db import models
-
-#import django.utils.datastructures.SortedDict
-
 from imgsearch.models import Histograms, Images, Keywords
-
 import StringIO
 from PIL import Image, ImageDraw
-
 from itertools import chain
 from operator import itemgetter
-
 from edit_dist import EditDistance
-
 import json
-
 import sys, os, zipfile, shutil
-
 import logging as log
+
+# Here be dragons...
 
 def calculate_hist(f):
    
@@ -91,8 +83,7 @@ def get_consecutive_hist(f, IMAGE_DIR, VIDEO_DIR):
     destination.close()
 
 
-    
-    ofile.close()
+    destination.close()
     iz.close()
 
    
@@ -163,8 +154,41 @@ def get_sequence(hists):
 
         clips_seqs[clip_count] = seq
         clip_count += 1
-        
-
-    print clips_seqs
 
     return clips_seqs
+
+
+def seq_into_db(filename, seq, hist, title, desc):
+    """
+    seq: {0:[[1, 2],...]...}
+    hist [{0:[122, 123, 2, 3, ...]}, { 1:[23,422,445]...} ... ]
+    """
+
+    
+    return
+
+    
+def find_frames(seq):
+    """
+    takes a list of sequences and returns three frames.
+    """
+    count = 0
+    f = []
+    l = len(seq)
+    for i in range(l):
+
+        if count == 3:
+            return f
+        if l == 1:
+            return [seq[i][0], seq[i][len(seq[i])/2], seq[i][len(seq[i])-1]]
+        elif l == 2:
+            if len(seq[i]) >= 3:
+                f.append(seq[i][0])
+                f.append(seq[i][len(seq[i])/2])
+                count +=2
+            else:
+                f.append(seq[i][0])
+        else:
+            f.append(seq[i][len(seq[i])/2])
+            count +=1
+    return f

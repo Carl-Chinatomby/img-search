@@ -537,8 +537,11 @@ def upload_file(request):
                     res = request.FILES['vid']
 
                     histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
-                    print "\nNumber of histograms: ", len(histograms)
+                    
                     sequence = get_sequence(histograms)
+
+                    # This function saves 3 main frames from all the seqs given into the database
+                    seq_into_db(res.name, sequence, histograms, str(request.POST['title']), str(request.POST['textarea']))
 
                     return HttpResponseRedirect('/upload/complete')
                     
