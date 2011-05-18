@@ -451,18 +451,10 @@ def results(request):
             res = []
             for i in range(len(results[0])):
             
-                results[0][i].percent = 100.0 - results[0][i].percent;
+                results[0][i].percent = ((100.0 - results[0][i].percent) + (100.0 - results[1][i].percent)) / 2.0;
                 res.append(results[0][i])
                     
-                """
-                if i & 1 == 0:
-                    results[0][i].percent = 100.0 - results[0][i].percent;
-                    res.append(results[0][i])
-                    
-                else:
-                    results[1][i].percent = 100.0 - results[1][i].percent;
-                    res.append(results[1][i])
-                """
+              
             print results
             if text == None:
                 return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
