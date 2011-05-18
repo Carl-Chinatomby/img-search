@@ -74,7 +74,7 @@ def sort_query_results(qrlst, attr=id):
     print qrlst
     ranked = [(getattr(qr, attr), qr) for qr in qrlst].sort() #returns a list of tuples sorted by id
     print ranked
-    return [ entry[1] for entry in ranked ] if ranked else ranked
+    return [ entry[1] for entry in ranked ] if ranked else qrlst
 #------
         
 
@@ -776,6 +776,7 @@ def txt_hist_res_merge(txt_results, hist_results):
             print "the hres id is"
             print hres.id
             if tres.id == hres.id: #intersection in both sets
+                print "Found a MATCH!!!!"
                 cur_res.id = tres.id
                 cur_res.filename = tres.id
                 cur_res.histogram = hres.histogram
