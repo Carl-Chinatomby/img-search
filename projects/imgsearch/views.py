@@ -11,6 +11,8 @@ from django.db import models
 
 from imgsearch.models import Histograms, Images, Keywords
 
+from django.http import Http404
+
 import StringIO
 from PIL import Image, ImageDraw
 
@@ -347,12 +349,17 @@ def gradient(filename, new_filename):
     
 
     return
-
-
+    
 
 def img_only_search(f):
    
-    
+    tmp = Image.open(f)
+
+    if tmp.mode != 'L':
+        
+        raise Http404
+
+
     tmp_img = IMAGE_DIR + '/cur_pic.jpg'
     tmp_img_edge = IMAGE_DIR + '/cur_pic_edge.jpg'
 
@@ -549,7 +556,7 @@ def upload_file(request):
                
                 try:
                     """
-                    Here we upload the zipped file, and process 3 frames from 5
+                    Here we upload the zipped file, and process n-clips with m-frames
                     """
                     res = request.FILES['vid']
 

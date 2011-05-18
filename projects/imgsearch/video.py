@@ -118,7 +118,7 @@ def get_sequence(hists):
         so for clip 0, with 3 sequences, it would look like this:
         { 0: [[1, 2], [3], [4, 5]], ...}
     """
-    threshold = 10.0
+    threshold = 2.0
 
     # I'm normalizing (0 to 100) as well as calculating the difference below
     
