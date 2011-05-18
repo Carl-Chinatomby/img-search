@@ -41,7 +41,9 @@ VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
 #class to hold the result to display
 
 class QueryResult:
-    
+    """
+    A Result class that represents an object to be passed to the templates on the results page
+    """
     def __init__(self):
         self.id = 0
         self.filename = ''
@@ -50,6 +52,9 @@ class QueryResult:
         self.rank = 0.0
         self.title = ''
         self.description = ''
+        #Video Fields
+        self.video = False
+        self.framename = None
     
     def __cmp__(self, other):
         if self.precent < other.percent:
@@ -58,6 +63,14 @@ class QueryResult:
             return 0
         else:
             return 1
+        
+def sort_query_results(qrlst, attr=id):
+    """
+    Sorts a list of Query Result Objects by the attribute given
+    """
+    #sorted_attr = [(getattr(qrlst[i], attr), i, qrlst[i]), for i in xrange(len(qrlst))]
+    sorted_attr = [(getattr(qr, attr), qr), for qr in qrlst)].sort() #returns a list of tuples sorted by id
+    return [ entry[1] for entry in sorted_attr ] 
 
 def img_rank(histograms):
     
@@ -372,7 +385,6 @@ def img_only_search(f):
     
 
     ## Now, we calculate the edge and intensity histograms of this image...
-
     norm_hist = calculate_hist(tmp_img, 'n', False)
     gradient(tmp_img, tmp_img_edge)
     edge_hist = calculate_hist(tmp_img_edge, 'e', False)
@@ -750,7 +762,7 @@ def txt_hist_res_merge(txt_results, hist_results):
                 hist_results.append(cur_res)
     
     #Reranking Phase
-    
+    hist_results = sort_query_results(hist_results)
     
     return hist_results
 
