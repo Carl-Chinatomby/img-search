@@ -764,7 +764,7 @@ def txt_hist_res_merge(txt_results, hist_results):
             if tres.id == hres.id: #intersection in both sets
                 print "Found a MATCH!!!!"
                 cur_res.id = tres.id
-                cur_res.filename = tres.id
+                cur_res.filename = tres.filename
                 cur_res.histogram = hres.histogram
                 cur_res.rank = 0
                 cur_res.percent = hres_weight * hres.percent + tres_weight * tres.percent
