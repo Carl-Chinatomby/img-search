@@ -7,7 +7,7 @@ By Carl Chinatomby, Eudis Duran, Reddy Chukkalore
 ##Indexing Phase:
 
 ###Text:
-WHen an Image is uploaded, the title and the description is inputted.
+When an Image is uploaded, the title and the description is inputted.
 We use a hashmap to build a frequency table for all the words (except
 STOP words). We count title frequencies as double (Since a title match
 is more relevant that a content match of the description). This
@@ -20,11 +20,11 @@ both the edge map and the original into our histograms database and
 use the images database to relate to it.
 
 ###Video:
-Video's are uploaded as a zip file. The zip file conists of several
+Video's are uploaded as a zip file. The zip file consists of several
 clips which may have several sequences. This is extracted into a folder.
 Histograms are created for each frame of the clip. We calculate the
 differences between the histograms. If there difference is
-higher then a thresholdvalue (constant set in program) then we determine
+higher then a threshold value (constant set in program) then we determine
 determine that a scene change has been made and create a list of lists
 of frame numbers for that scene. We then have everything broken into
 scenes. We take a frame from the first scene, middle scene, and last
@@ -36,7 +36,7 @@ image and the edge mapped image.
 ###Histograms:
 For Histograms, we scan each pixel in the image and see if it what
 range it falls into for [0-255]/16 and insert it into that bin
-(increment it).
+(incremented).
 
 ##Querying:
 
@@ -64,5 +64,5 @@ then see what scene it matched and set the filename for that. Then we
 Display the video in our result but indexed by the scene that matched.
 
 ###Edit Distance: Python Lists are created for the subsets of splits,
-deletes, transposts, replaces, inserts, then a set is created for all
+Deletes, transposts, replaces, inserts, then a set is created for all
 the ones that match by the 1 character change. 
