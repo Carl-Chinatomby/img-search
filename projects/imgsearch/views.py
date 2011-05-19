@@ -56,12 +56,12 @@ class QueryResult:
         #Video Fields
         self.video = False
         self.framename = None
-        self.type = ''
+        self.type = 'Image'
     
     def __cmp__(self, other):
-        if self.precent < other.percent:
+        if self.percent < other.percent:
             return -1
-        elif self.precent == other.percent:
+        elif self.percent == other.percent:
             return 0
         else:
             return 1
@@ -124,27 +124,31 @@ def img_rank(histograms):
             if i >= 16:
                 break
         res.id = int(norm['id'])
-        """
-        print 
-        print "ID: ",
-        print res.id
-        """
+
         clips = Clips.objects.all().values()
         for clip in clips:
             c = clip['orig_hist_clips']
+            s = c.split(',')
+            if str(res.id) in s:
+                if str(res.id) == s[0]:
+                    res.framename = 'This'                
+                elif str(res.id) == s[1]:
+                    res.framename = 'That'
+                elif str(res.id) == s[2]:
+                    res.framename = 'Oh'
 
-            if str(res.id) in c.split(','):
-                
                 clip_id = clip['id']
                 videos = Videos.objects.all().values()
                 print "LEN: "
                 print len(videos)
                 for vid in videos:
-                    
                     if str(clip_id) in vid['clips']:
                         res.filename = vid['filename'] 
-                        print "\n\nVID: "
-                        print res.filename
+                        res.title = vid['title']
+                        res.description = vid['description']
+                        res.percent = res.percent/16.0
+                        res.type = 'Video'
+                        res.video = True
         """  
         res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
         res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
@@ -198,6 +202,31 @@ def img_rank(histograms):
                 break
         
         res.id = int(edge['id'])
+
+        clips = Clips.objects.all().values()
+        for clip in clips:
+            c = clip['edge_hist_clips']
+            s = c.split(',')
+            if str(res.id) in s:
+                if str(res.id) == s[0]:
+                    res.framename = 'This'                
+                elif str(res.id) == s[1]:
+                    res.framename = 'That'
+                elif str(res.id) == s[2]:
+                    res.framename = 'Oh'
+
+                clip_id = clip['id']
+                videos = Videos.objects.all().values()
+                print "LEN: "
+                print len(videos)
+                for vid in videos:
+                    if str(clip_id) in vid['clips']:
+                        res.filename = vid['filename'] 
+                        res.title = vid['title']
+                        res.description = vid['description']
+                        res.percent = res.percent/16.0
+                        res.type = 'Video'
+                        res.video = True
         """
         print 
         print "ID: ",
@@ -629,6 +658,8 @@ def results(request):
                 res.append(results[0][i])
                     
               
+            res = sort_query_results(res, 'percent')
+
             print results
             if text == None:
                 return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})

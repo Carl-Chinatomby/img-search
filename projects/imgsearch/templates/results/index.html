@@ -114,8 +114,12 @@
         <ol style='overflow-x: hidden; overflow-y: auto;'>
             {% for j in results %}
              <li class='res'>
+                {% if results.video == False %}
                 <img src="{{ STATIC_PREFIX }}images/{{ j.filename }}" width='50' height='50' alt='No Pic' />
-                <a href="{{ j.filename }}" >{{ j.title }}</a> - FileType: {{ j.type }} - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                <a href="{{ j.filename }}" >{{ j.title }}</a> - FileType: <span style='color:red'>{{ j.type }}</span> - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                {% else %}
+                <a href="{{ j.framename }}" >{{ j.title }}</a> - FileType: <span style='color:blue'> {{ j.type }} </span> - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                {%endif %}
                 
                 <hr/>
             </li>
