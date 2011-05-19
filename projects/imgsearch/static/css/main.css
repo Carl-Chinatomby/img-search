@@ -24,10 +24,17 @@
     float: left;
 }
 
+#video {
+    width: 100%;
+    text-align: center;
+    float: left;
+}
+
 #upload {
     width: 100%;
     text-align: center;
     float: left;
+    font-size: 16px;
 }
 
 #upload a {
@@ -35,5 +42,5 @@
 }
 
 #upload a:hover {
-    font-size: 16px;
+    font-size: 20px;
 }

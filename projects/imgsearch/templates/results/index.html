@@ -53,11 +53,12 @@
  <div style='float: left; width: 100%; text-align: center;'>
     <a style='font-size: 18px;' href="/">Back To Search</a><br /> <br /> <br />
  </div>
-
+ 
+ {% if img_path %}
  <div style='float: left; width: 100%;'> 
     
     <div id="orig">
-        
+       
         <div style='width:20%; float: left;'>
             <div> Original Image </div>
             <br />
@@ -86,7 +87,8 @@
            </div>-->
            
         </div>
-        <div class='r' style='width:22%; float: left; border: 1px solid black; padding: 1% 1% 1% 1%;'>
+        
+	<div class='r' style='width:22%; float: left; border: 1px solid black; padding: 1% 1% 1% 1%;'>
            <div style='width: 39%; float: left;'>
             <div> Edge Map Image Histogram </div>
             <br />
@@ -100,6 +102,7 @@
     </div>
     
  </div>
+ {% endif %}
  <div style='float: left; width: 100%; text-align: center; font-size: 18px;'>
     <hr />
     <br />
@@ -109,14 +112,19 @@
     <div id='results'>
 
         <ol style='overflow-x: hidden; overflow-y: auto;'>
-        {% for i in results %}
-            {% for j in i %}
+            {% for j in results %}
              <li class='res'>
-                <a href='#'>{{ j.filename }}</a> - <a href="#"> View Historgram </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
-                <hr />
+                {% if results.video == False %}
+                <img src="{{ STATIC_PREFIX }}images/{{ j.filename }}" width='50' height='50' alt='No Pic' />
+                <a href="{{ j.filename }}" >{{ j.title }}</a> - FileType: <span style='color:red'>{{ j.type }}</span> - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                {% else %}
+                <a href="{{ j.framename }}" >{{ j.title }}</a> - FileType: <span style='color:blue'> {{ j.type }} </span> - <a href="#"> View Description </a> &nbsp; &nbsp; &nbsp; Rank: {{ j.percent }}%
+                {%endif %}
+                
+                <hr/>
             </li>
             {% endfor %}
-        {% endfor %}
+       
         </ol>  
     </div>
  </div>

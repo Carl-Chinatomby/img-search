@@ -11,6 +11,8 @@ from django.db import models
 
 from imgsearch.models import Histograms, Images, Keywords
 
+from django.http import Http404
+
 import StringIO
 from PIL import Image, ImageDraw
 
@@ -22,35 +24,62 @@ from edit_dist import EditDistance
 import json
 
 import sys
+import string
+
+from imgsearch.video import *
+
 
 #This needs to point to your repository static/image folder!
 IMAGE_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/images'
 #IMAGE_DIR = '/home/carl/git/img-search/projects/imgsearch/static/images'
+#IMAGE_DIR = '/home5/bluemedi/.local/lib/python2.7/site-packages/projects/imgsearch/static/images'
 
 #This needs to point to your repository static/videos folder!
 VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
 #VIDEO_DIR = '/home/carl/git/img-search/projects/imgsearch/static/videos'
-
+#VIDEO_DIR = '/home/prototype/repos/git/img-search/projects/imgsearch/static/videos'
 
 
 #class to hold the result to display
-
 class QueryResult:
-    
+    """
+    A Result class that represents an object to be passed to the templates on the results page
+    """
     def __init__(self):
         self.id = 0
         self.filename = ''
         self.histogram = None
         self.percent = 0.0
         self.rank = 0.0
+        self.title = ''
+        self.description = ''
+        #Video Fields
+        self.video = False
+        self.framename = None
+        self.type = 'Image'
     
     def __cmp__(self, other):
-        if self.precent < other.percent:
+        if self.percent < other.percent:
             return -1
-        elif self.precent == other.percent:
+        elif self.percent == other.percent:
             return 0
         else:
             return 1
+        
+def sort_query_results(qrlst, attr=id):
+    """
+    Query Result Toolkit Function
+    Sorts a list of Query Result Objects by the attribute given
+    """
+    ranked = [(getattr(qr, attr), qr) for qr in qrlst].sort() #returns a list of tuples sorted by attr
+    return [ entry[1] for entry in ranked ] if ranked else qrlst
+
+
+def video_rank(histograms):
+
+
+    return
+
 
 def img_rank(histograms):
     
@@ -63,16 +92,184 @@ def img_rank(histograms):
     cur_norm = histograms[0]
     cur_edge = histograms[1]
 
-    all_norms = Histograms.objects.filter(hist_type='n').all().values()
-    all_edge  = Histograms.objects.filter(hist_type='e').all().values()
+    all_norms = Histograms.objects.filter(hist_type='n', is_video='x').all().values()
+    all_edge  = Histograms.objects.filter(hist_type='e', is_video='x').all().values()
 
+    all_norms_videos = Histograms.objects.filter(hist_type='n', is_video='y').all().values()
+    all_edge_videos  = Histograms.objects.filter(hist_type='e', is_video='y').all().values()
 
     """
     Each histogram represents a different picture in the database.  What I'm doing
     here is simply comparing the current pictures histogram (bin by bin) with 
-    all of the picutures histograms which are stored in the database.  This first
+    all of the pictures histograms which are stored in the database.  This first
     case is only for the normal images.  The next case is for the edge map.
     """
+    j = 0
+    for norm in all_norms_videos:
+        i = 0
+
+        res = QueryResult()
+        for k, v in norm.iteritems():
+            
+            norm_diff[i] = abs(norm['bin' + str(i)] - cur_norm[i])
+            m = max((norm['bin' + str(i)], cur_norm[i]))
+            if m != 0:
+                res.percent += abs( 100.0 * (norm_diff[i]/ float(m)) )
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (norm_diff[i]/ float(m)) ))
+            else:
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)
+                pass
+
+            i += 1
+            if i >= 16:
+                break
+        res.id = int(norm['id'])
+
+        clips = Clips.objects.all().values()
+        for clip in clips:
+            c = clip['orig_hist_clips']
+            s = c.split(',')
+            if str(res.id) in s:
+                if str(res.id) == s[0]:
+                    res.framename = 'This'                
+                elif str(res.id) == s[1]:
+                    res.framename = 'That'
+                elif str(res.id) == s[2]:
+                    res.framename = 'Oh'
+
+                clip_id = clip['id']
+                videos = Videos.objects.all().values()
+                print "LEN: "
+                print len(videos)
+                for vid in videos:
+                    if str(clip_id) in vid['clips']:
+                        res.filename = vid['filename'] 
+                        res.title = vid['title']
+                        res.description = vid['description']
+                        res.percent = res.percent/16.0
+                        res.type = 'Video'
+                        res.video = True
+        """  
+        res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
+        res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
+        res.percent = res.percent/16.0
+
+        res.type = "Video"
+        res.video = True
+        hist_type = Histograms.objects.all().values().get(id=res.id)['type']
+        #find the edge hist clip that contain that id in that array (dammit this made things harder)
+        curclip = Clips.objects.all().filter(Q(edge_hist_clips__startswith=res.id+',') | Q(edge_hist_clips__endswith=','+res.id) | Q(edge_hist_clips__contains=','+res.id+',') | Q(edge_hist_clips__exact=res.id))
+        clip_edge_hists = curclip.edge_hist_clips
+        #now we need to find out what frame match
+        clip_edge_lst = clip_edge_hists.split(',') 
+        if clip_edge_list[0] == res.id:
+            pass
+            #set the framename, we may need the clip name attribute added so we can know what path to go to.
+            #test the above and then do the same process to find out what video the clip is associated with with that same type of query 
+            #then set the filename
+        elif clip_edge_list[1] == res.id:
+            pass
+        else:
+            pass
+            
+        #res.framename = 
+        """
+        if res.percent != 100.0:
+            result.append(res)
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
+        j += 1
+
+    print "\n Edge Map: "
+    j = 0
+    for edge in all_edge_videos:
+        i = 0
+
+        res = QueryResult()
+        for k, v in edge.iteritems():
+            
+            edge_diff[i] = abs(edge['bin' + str(i)] - cur_edge[i])
+            m = max((edge['bin' + str(i)], cur_edge[i]))
+            if m != 0:
+                res.percent += abs( 100.0 * (edge_diff[i]/ float(m)) )
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, abs( 100.0 * (edge_diff[i]/ float(m)) ))
+            else:
+                #print "Histogram #%d Bin %d Difference = %f" % (j, i, 0)      
+                pass
+
+            i += 1
+            if i >= 16:
+                break
+        
+        res.id = int(edge['id'])
+
+        clips = Clips.objects.all().values()
+        for clip in clips:
+            c = clip['edge_hist_clips']
+            s = c.split(',')
+            if str(res.id) in s:
+                if str(res.id) == s[0]:
+                    res.framename = 'This'                
+                elif str(res.id) == s[1]:
+                    res.framename = 'That'
+                elif str(res.id) == s[2]:
+                    res.framename = 'Oh'
+
+                clip_id = clip['id']
+                videos = Videos.objects.all().values()
+                print "LEN: "
+                print len(videos)
+                for vid in videos:
+                    if str(clip_id) in vid['clips']:
+                        res.filename = vid['filename'] 
+                        res.title = vid['title']
+                        res.description = vid['description']
+                        res.percent = res.percent/16.0
+                        res.type = 'Video'
+                        res.video = True
+        """
+        print 
+        print "ID: ",
+        print res.id
+        """
+
+        """
+        res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
+        res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
+        res.percent = res.percent/16.0
+
+        
+        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
+            res.type = "Video"
+            res.video = True
+            hist_type = Histograms.objects.all().values().get(id=res.id)['type']
+            #find the edge hist clip that contain that id in that array (dammit this made things harder)
+            curclip = Clips.objects.all().filter(Q(edge_hist_clips__startswith=res.id+',') | Q(edge_hist_clips__endswith=','+res.id) | Q(edge_hist_clips__contains=','+res.id+',') | Q(edge_hist_clips__exact=res.id))
+            clip_edge_hists = curclip.edge_hist_clips
+            #now we need to find out what frame match
+            clip_edge_lst = clip_edge_hists.split(',') 
+            if clip_edge_list[0] == res.id:
+                #set the framename, we may need the clip name attribute added so we can know what path to go to.
+                #test the above and then do the same process to find out what video the clip is associated with with that same type of query 
+                #then set the filename
+            elif clip_edge_list[1] == res.id:
+                pass
+            else:
+                pass
+            
+            #res.framename = 
+        """
+        if res.percent != 100.0:
+            result1.append(res)
+
+
+        #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
+        j += 1
+
+
+
+    # IMAGE SEARCH -============================================================
     j = 0
     for norm in all_norms:
         i = 0
@@ -92,12 +289,24 @@ def img_rank(histograms):
             i += 1
             if i >= 16:
                 break
-        res.id = norm['id']
-        #print 
-        #print "ID: ",
+        res.id = int(norm['id'])
+        """
+        print 
+        print "ID: ",
         print res.id
+        """
+        res.filename = Images.objects.all().values().get(orig_hist=res.id)['filename']
         res.percent = res.percent/16.0
-        if res.percent != 0:
+        res.title = Images.objects.all().values().get(orig_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(orig_hist=res.id)['description']
+
+
+        if str(Histograms.objects.all().values().get(id=res.id)['is_video']) == 'y':
+            res.type = "Video"
+            res.video = True
+            
+
+        if res.percent != 100.0:
             result.append(res)
         #print "Cummulative difference for Histogram #%d = %f" % (j, result[j].percent)
         j += 1
@@ -122,11 +331,23 @@ def img_rank(histograms):
             i += 1
             if i >= 16:
                 break
+        
+        res.id = int(edge['id'])
+        """
+        print 
+        print "ID: ",
+        print res.id
+        """
 
-        res.id = norm['id']
+        res.filename = Images.objects.all().values().get(edge_hist=res.id)['filename']
+        res.title = Images.objects.all().values().get(edge_hist=res.id)['title']
+        res.description = Images.objects.all().values().get(edge_hist=res.id)['description']
         res.percent = res.percent/16.0
-        if res.percent != 0.0:
+
+        if res.percent != 100.0:
             result1.append(res)
+
+
         #print "Cummulative difference for Histogram #%d = %f" % (j, result1[j].percent)
         j += 1
             
@@ -139,13 +360,6 @@ def img_rank(histograms):
 class UploadFile(forms.Form):
     name = models.ImageField()
 
-def mysorted(mylist):
-
-   
-    
-    
-
-    return l
     
 
 def handle_img_upload(f):
@@ -177,7 +391,7 @@ def handle_img_upload(f):
 
     # At this point, the file is in the images folder, and we can
     # do processing on it.
-    calculate_hist(path, 'n')
+    calculate_hist(path, 'n', True)
 
     # Next, we generate a edge map.  We can use various 
     # methods, but I went with the easiest for this, which is a basic gradient edge detection
@@ -186,13 +400,19 @@ def handle_img_upload(f):
 
     
     #Finally, we calculate the edge map histogram
-    calculate_hist(tmp_file, 'e')
+    calculate_hist(tmp_file, 'e', True)
     
 
     return
 
-def calculate_hist(path, t):
-    """ Returns a length 16 list """
+def calculate_hist(path, t, flag):
+    """ Returns a length 16 list
+        The third parameter is a flag.  It says that if it's set
+        to false, we should not put the calcuated histograms in the
+        database.  And we should if it's true.  This came about because
+        of the fact that search image histograms do not need to be put in the database
+        while uploaded images do.  And since I use the same function to calculate the
+        histograms there is no need to rewrite code, just set a flag."""
     try:
         image = Image.open(path)
     except IOError:
@@ -238,27 +458,27 @@ def calculate_hist(path, t):
     print "Size: ", len(hist16bin)
     print "Original Size: ", len(hist)
     
-    # Now we put the normal histogram in the database
-
-    normal = Histograms()
-    normal.bin0 = hist16bin[0]
-    normal.bin1 = hist16bin[1]
-    normal.bin2 = hist16bin[2]
-    normal.bin3 = hist16bin[3]
-    normal.bin4 = hist16bin[4]
-    normal.bin5 = hist16bin[5]
-    normal.bin6 = hist16bin[6]
-    normal.bin7 = hist16bin[7]
-    normal.bin8 = hist16bin[8]
-    normal.bin9 = hist16bin[9]
-    normal.bin10 = hist16bin[10]
-    normal.bin11 = hist16bin[11]
-    normal.bin12 = hist16bin[12]
-    normal.bin13 = hist16bin[13]
-    normal.bin14 = hist16bin[14]
-    normal.bin15 = hist16bin[15]
-    normal.hist_type = t
-    normal.save()
+    # Now we put the histogram in the database
+    if flag == True:
+        normal = Histograms()
+        normal.bin0 = hist16bin[0]
+        normal.bin1 = hist16bin[1]
+        normal.bin2 = hist16bin[2]
+        normal.bin3 = hist16bin[3]
+        normal.bin4 = hist16bin[4]
+        normal.bin5 = hist16bin[5]
+        normal.bin6 = hist16bin[6]
+        normal.bin7 = hist16bin[7]
+        normal.bin8 = hist16bin[8]
+        normal.bin9 = hist16bin[9]
+        normal.bin10 = hist16bin[10]
+        normal.bin11 = hist16bin[11]
+        normal.bin12 = hist16bin[12]
+        normal.bin13 = hist16bin[13]
+        normal.bin14 = hist16bin[14]
+        normal.bin15 = hist16bin[15]
+        normal.hist_type = t
+        normal.save()
 
     return hist16bin
 
@@ -332,12 +552,11 @@ def gradient(filename, new_filename):
     
 
     return
-
-
+    
 
 def img_only_search(f):
-   
-    
+
+
     tmp_img = IMAGE_DIR + '/cur_pic.jpg'
     tmp_img_edge = IMAGE_DIR + '/cur_pic_edge.jpg'
 
@@ -357,10 +576,9 @@ def img_only_search(f):
     
 
     ## Now, we calculate the edge and intensity histograms of this image...
-
-    norm_hist = calculate_hist(tmp_img, 'n')
+    norm_hist = calculate_hist(tmp_img, 'n', False)
     gradient(tmp_img, tmp_img_edge)
-    edge_hist = calculate_hist(tmp_img_edge, 'e')
+    edge_hist = calculate_hist(tmp_img_edge, 'e', False)
 
     #Now, we pass the information to the calling method so we can pass it 
     #to the template for display
@@ -402,9 +620,12 @@ def results(request):
         
         if img == None and text != None:
             # text only search
-            text_only_search(text)
+            res = text_only_search(text)
+            
+            return render_to_response("results/index.html", {'query': text, 'results':res})
+            
 
-        elif img != None and text == None:
+        elif img != None:
             # img only search   
            
             print  " img: ", request.FILES['img_file'].content_type
@@ -414,44 +635,48 @@ def results(request):
 
             form = UploadFile(request.POST, request.FILES['img_file'])
 
+            
+            # Test to see that the uploaded image is 'L' band
+            test_grayscale = Image.open(StringIO.StringIO(request.FILES['img_file'].read()))
+            if test_grayscale.mode != 'L':
+                return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
+
             histograms = img_only_search(request.FILES['img_file'])
 
+
+            """ At this point, the two elements in the results list 
+                correspond to the same image information, but for two
+                histograms, namely normal and edge map histograms.  I
+                interleave the results.
+            """         
             results = img_rank(histograms)
+
+            res = []
+            for i in range(len(results[0])):
             
-            """
-            # fill in some details, life filename etc.
-            for i in results[0]:
-                i.filename = Images.objects.filter(id=i.id).values()[0]['filename']
+                results[0][i].percent = ((100.0 - results[0][i].percent) + (100.0 - results[1][i].percent)) / 2.0;
+                res.append(results[0][i])
+                    
+              
+            res = sort_query_results(res, 'percent')
 
-            for i in results[1]:
-                i.filename = Images.objects.filter(id=i.id).values()[0]['filename']
-            
-            """
-            return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':results})
-            
-            #return render_to_response("results/index.html", context_instance=RequestContext(request))
-            pass
-
-        elif img != None and text != None:
-            # text AND img search        
-            pass
-
-
-
-            
-
-        """
-        try:
-            form = UploadFile(request.POST, request.FILES['img_file'])
-            if form.is_valid():
-                print "FUCK YEAH"
-                #handle_img_search(request.FILES['img_file'])
-                return render_to_response("results/index.html", context_instance=RequestContext(request))
+            print results
+            if text == None:
+                return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
+                #return render_to_response("results/index.html", context_instance=RequestContext(request))
             else:
-                return HttpResponse("Invalid form input...")
-        except:
-            return HttpResponse("Error using image in search...")
-        """
+                # text AND img search        
+                print "testing txt and img search"
+                
+                txt_res = text_only_search(text)
+                print "the text results were"
+                print txt_res
+                print "the img results were"
+                print res
+                res = txt_hist_res_merge(txt_res, res)
+                print "the merged results are"
+                print res
+                return render_to_response("results/index.html", {'histograms': json.dumps(histograms), 'img_path' : request.FILES['img_file'].name, 'query': '', 'results':res})
     
                     
 
@@ -473,50 +698,76 @@ def upload_file(request):
 
     try:
     	if request.method == 'POST':
+            form = None
             
-            form = UploadFile(request.POST, request.FILES['img'])
-            
-            if form.is_valid():
+            try:
+                res = request.FILES['img']
                 
-                #We test to see if the given image is of L band (true Grayscale)
-                test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
-                if test_grayscale.mode != 'L':
-                    return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
-                handle_img_upload(request.FILES['img'])
-
-                # We know that the normal histogram is inserted into the database
-                # first, and the edge second, so we can do this hack:
-                edge_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 1]['id']
-                norm_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 2:len(Histograms.objects.all()) - 1].get()['id']
+                """
+                This part handles the image upload
+                """
+                form = UploadFile(request.POST, request.FILES['img'])
+                if form.is_valid():
                 
-                # Here, we insert the Images information, now that we have the two IDs above.
+                    #We test to see if the given image is of L band (true Grayscale)
+                    test_grayscale = Image.open(StringIO.StringIO(request.FILES['img'].read()))
+                    if test_grayscale.mode != 'L':
+                        return HttpResponse("Image is not grayscale!  Has " + test_grayscale.mode + " band.  Needs 'L' for true Grayscale!")
+                    handle_img_upload(request.FILES['img'])
 
-                img = Images()
+                    # We know that the normal histogram is inserted into the database
+                    # first, and the edge second, so we can do this hack:
+                    edge_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 1]['id']
+                    norm_id = Histograms.objects.order_by('id').values('id')[len(Histograms.objects.all()) - 2:len(Histograms.objects.all()) - 1].get()['id']
+                
+                    # Here, we insert the Images information, now that we have the two IDs above.
+
+                    img = Images()
                
-                print str(request.FILES['img'].name)
-                print int(norm_id)
-                print int(edge_id)
-                print str(request.POST['title'])
-                print str(request.POST['textarea'])
+                    print str(request.FILES['img'].name)
+                    print int(norm_id)
+                    print int(edge_id)
+                    print str(request.POST['title'])
+                    print str(request.POST['textarea'])
                 
-                img.filename = str(request.FILES['img'].name)
-                img.orig_hist = int(norm_id)
-                img.edge_hist = int(edge_id)
-                img.title = str(request.POST['title'])
-                img.description = str(request.POST['textarea'])
-                img.save()
-                index_img_kw(img, img.title, img.description)
+                    img.filename = str(request.FILES['img'].name)
+                    img.orig_hist = int(norm_id)
+                    img.edge_hist = int(edge_id)
+                    img.title = str(request.POST['title'])
+                    img.description = str(request.POST['textarea'])
+                    img.save()
+                    index_img_kw(img, img.title, img.description)
 
-                return HttpResponseRedirect('/upload/complete')
-            else:
-                return HttpResponse("Invalid form input...")
+                    return HttpResponseRedirect('/upload/complete')
+                else:
+                    return HttpResponse("Invalid form input...")    
+            except:
+               
+                try:
+                    """
+                    Here we upload the zipped file, and process n-clips with m-frames
+                    """
+                    res = request.FILES['vid']
+
+                    histograms = get_consecutive_hist(res, IMAGE_DIR, VIDEO_DIR)
+                    
+                    sequence = get_sequence(histograms)
+
+                    # This function saves 3 main frames from all the seqs given into the database
+                    seq_into_db(res.name, sequence, histograms, str(request.POST['title']), str(request.POST['textarea']))
+
+                    return HttpResponseRedirect('/upload/complete')
+                    
+                except:
+                    HttpResponse("Error uploading Video!")
+            
         else:
             
             form = UploadFile()
     except:
         return HttpResponse("Error During Upload")
         
-    return render_to_response("upload/index.html", { 'form':form} )
+    return render_to_response("upload/index.html", { 'form':form}, context_instance=RequestContext(request) )
    
 
 STOP_WORDS = ['I', 'a', 'about', 'an', 'are', 'as', 'at', 'be', 'by', 'com', 
@@ -538,8 +789,9 @@ def index_img_kw(img, title, description):
     des_kws = description.split()
     #titles count as double weight
     for word in title_kws:
+        word = word.lower()
+        word = string.translate(word, None, string.punctuation)
         if word not in STOP_WORDS:
-            word = word.lower()
             frequencies[word] = frequencies[word] + 2 if word in frequencies else 2
     print "title frequencies are"
     print frequencies
@@ -547,6 +799,7 @@ def index_img_kw(img, title, description):
     for word in des_kws:
         if word not in STOP_WORDS:
             word = word.lower()
+            word = string.translate(word, None, string.punctuation)
             frequencies[word] = frequencies[word] + 1 if word in frequencies else 1
     
     print "frequencies after the descriptions are"
@@ -577,26 +830,31 @@ def text_only_search(text):
     results = []
     ed = EditDistance(Keywords, 'keyword')
 
-    #exact and substring keyword matches incase-sensitive
     for word in search_words:
         if word not in STOP_WORDS:
-           cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)"}, select_params=[word]).filter(keyword__contains=word).order_by('diff','-frequency')
-           results = list(chain(results, cur_res))
-           print cur_res
-           ed.correct(word)
-           #for res in cur_res:
-           #   for kw in res:
-           #    print "Keyword %s has frequency %d and diff %d" % (res.keyword, res.frequency, res.diff)
+            #exact and substring keyword matches incase-sensitive
+            #####
+            #cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)"}, select_params=[word]).filter(keyword__contains=word).order_by('diff','-frequency')
+            #results = list(chain(results, cur_res))
+            #print cur_res
+            ####
+            ed_list, ed_diff = ed.correct(word)
+            for res in ed_list:
+                #### Advanced search features for later
+                #cur_res = Keywords.objects.extra(select={'diff':"length(keyword)-length(%s)+%d"}, select_params=[res, diff]).filter(keyword__contains=word)order_by('diff','-frequency')
+                ####
+                cur_res = Keywords.objects.extra(select={'diff':"%s"}, select_params=[ed_diff]).filter(keyword__exact=res).order_by('diff','-frequency')
+                results = list(chain(results, cur_res))
+                print cur_res
+            #for res in cur_res:
+            #   for kw in res:
+            #       print "Keyword %s has frequency %d and diff %d" % (res.keyword, res.frequency, res.diff)
 
     print results
     #now we need to rank the results for images based on most exact matches
     ranked_res = rank_results(results)
-    
-    #substring matches incase-sensitive
-    
-    #edit distance matches
-    
-    #return results
+
+    return ranked_res
     
 def rank_results(results):
     """
@@ -640,4 +898,69 @@ def rank_results(results):
     print ranked_diff
     ranked_res = [ x[0] for x in ranked_diff ] 
     print ranked_res
-    return ranked_res
+    final_res = txt_queryres_from_imgid(ranked_res, points)
+    print final_res
+    return final_res
+
+def txt_queryres_from_imgid(idlst, points):
+    """
+    idlst is a list of image id's ranked in descendingorder (the first element has the highest rank)
+    the Points dictionary is passed in to set the percentages
+    Returns a list of QueryResult objects 
+    """
+    cnt = 0
+    results = []
+    total_pts = sum([i for i in points.values()])
+    for imgid in idlst:
+        cnt += 1
+        cur_res = QueryResult()
+        cur_res.rank = cnt
+        cur_image = Images.objects.get(id=imgid)
+        cur_res.id = cur_image.id
+        cur_res.filename = cur_image.filename
+        cur_res.title = cur_image.title
+        cur_res.description = cur_image.description
+        cur_res.percent = points[cur_image.id] / float(total_pts) * 100
+        results.append(cur_res)
+    return results
+
+def txt_hist_res_merge(txt_results, hist_results):
+    """
+    Assumes both txt_results and hist_results is not empty
+    Finds the Intersection of results in both queries and recalculates the percentage where the
+    new percentage is 50% textres percent + 50% histres percent and reranked accordingly
+    """
+    #the weight should add up to 1
+    hres_weight = .50
+    tres_weight = .50
+    
+    #Intersection Phase
+    merged_results = []
+    for tres in txt_results:
+        for hres in hist_results:
+            cur_res = QueryResult()
+            if tres.id == hres.id: #intersection in both sets
+                cur_res.id = tres.id
+                cur_res.filename = tres.filename
+                cur_res.histogram = hres.histogram
+                cur_res.rank = 0
+                cur_res.percent = hres_weight * hres.percent + tres_weight * tres.percent
+                cur_res.title = tres.title
+                cur_res.description = tres.description
+                merged_results.append(cur_res)
+                break
+
+    #Reranking Phase
+    merged_results = sort_query_results(merged_results, 'percent') if merged_results else []
+    
+    return merged_results
+
+def vid_img_merg(vid_results, img_results):
+    """
+    merged the ranked video and img results and reranks based on percentage
+    """
+    merged_results = []
+    merged_results.extend(vid_results)
+    merged_results.extend(img_results)
+    sort_query_results(merged_results, 'percent')
+    return merged_results
